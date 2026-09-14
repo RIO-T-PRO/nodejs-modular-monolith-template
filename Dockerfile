@@ -46,7 +46,6 @@ FROM deps AS build
 COPY . .
 
 # Run your compilation scripts to build your source directories into production bundles
-# will be uncommented when the building script will be setup
 RUN pnpm build
 
 

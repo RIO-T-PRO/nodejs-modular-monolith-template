@@ -23,6 +23,12 @@ services:
       #   # Commented out for now. Uncomment this when you switch MESSAGE_DISPATCHER to "redis".
       #   condition: service_healthy
     restart: unless-stopped
+    networks:
+      # Connects to the internal network to communicate with the DB and Redis securely.
+      - app-network
+      # DEPLOYMENT NOTE: Uncomment 'proxy-tier' below when deploying to production
+      # behind an automated reverse proxy (like nginx-proxy / acme-companion for SSL).
+      # - proxy-tier
 
   # ============================================================================
   # POSTGRES DATABASE
@@ -47,6 +53,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      # SECURITY BEST PRACTICE: The database remains isolated on the internal network.
+      # It is never attached to the proxy-tier, preventing direct external access.
+      - app-network
 
   # ============================================================================
   # REDIS (OPTIONAL CACHE/EVENTS LAYER)
@@ -61,6 +71,35 @@ services:
   #     interval: 5s
   #     timeout: 5s
   #     retries: 5
+  #   networks:
+  #     - app-network
 
+# ============================================================================
+# NETWORK CONFIGURATION
+# ============================================================================
+networks:
+  # The default isolated internal network for inter-container communication.
+  app-network:
+    driver: bridge
+
+  # DEPLOYMENT NOTE: Uncomment this block when deploying to a Linux server
+  # using an automated reverse proxy.
+  # IMPORTANT: Before running 'docker compose up' on the server, you must
+  # create this network manually on the host machine using:
+  # $ docker network create proxy-tier
+  #
+  # proxy-tier:
+  #   external: true
+
+# ============================================================================
+# VOLUME CONFIGURATION
+# ============================================================================
 volumes:
+  # Named volumes guarantee that your data persists across container restarts and rebuilds.
+  # If a user tears down the environment (docker compose down), this database volume
+  # remains safely stored on the host machine.
+  # WARNING TO USERS: To completely wipe the database and start fresh, you must
+  # explicitly delete the volume by running: docker compose down -v
   db_data:
+    # Optional: If you eventually deploy to a cloud provider (AWS/GCP),
+    # you can configure external storage drivers here.
