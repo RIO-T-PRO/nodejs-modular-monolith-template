@@ -1,0 +1,11 @@
+packages:
+  - 'src/app'
+  - 'src/shared-kernel'
+  - 'src/modules/*'
+
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+minimumReleaseAgeExclude:
+  - zod@4.6.4
