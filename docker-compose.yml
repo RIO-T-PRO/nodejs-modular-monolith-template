@@ -1,0 +1,66 @@
+services:
+  # ============================================================================
+  # APPS CONTAINER
+  # ============================================================================
+  api:
+    build:
+      context: .
+      # Tells compose to grab Stage 5 (the runtime stage) from the Dockerfile.
+      target: runtime
+    ports:
+      # Map port 4001 on your computer to port 4001 inside the container.
+      - '${PORT:-4001}:${PORT:-4001}'
+    # SECURITY & CLEAN CODE NOTE:
+    # This reads all keys from your local, un-tracked '.env' file.
+    # Anyone using this template needs to copy '.env.example' to '.env' first!
+    env_file:
+      - .env
+    depends_on:
+      db:
+        # Waits for Postgres to be fully booted up before starting our code.
+        condition: service_healthy
+      # redis:
+      #   # Commented out for now. Uncomment this when you switch MESSAGE_DISPATCHER to "redis".
+      #   condition: service_healthy
+    restart: unless-stopped
+
+  # ============================================================================
+  # POSTGRES DATABASE
+  # ============================================================================
+  db:
+    image: postgres:16-alpine
+    environment:
+      # SECURITY BEST PRACTICE: No secrets are hardcoded here.
+      # Docker pulls these straight out of the user's private local .env file.
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-app_db}
+    ports:
+      - '5432:5432'
+    volumes:
+      # This named volume makes sure your database data isn't deleted
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      # The ping test that tells our application container that the database is officially ready.
+      # We use the dynamic user variable here to keep it flexible.
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # REDIS (OPTIONAL CACHE/EVENTS LAYER)
+  # ============================================================================
+  # COMMENTED OUT: Keep this ready for when your monolith domains expand.
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - '6379:6379'
+  #   healthcheck:
+  #     test: ['CMD', 'redis-cli', 'ping']
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+volumes:
+  db_data:

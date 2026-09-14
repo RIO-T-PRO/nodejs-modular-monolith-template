@@ -11,7 +11,7 @@
     "dev": "pnpm --filter @template/app dev",
     "build": "tsc -b tsconfig.json",
     "build:clean": "tsc -b tsconfig.json --clean",
-    "start": "node packages/app/dist/server.js",
+    "start": "node src/app/dist/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
