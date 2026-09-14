@@ -1,0 +1,160 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================================
+  # 1. BUILD & TEST (Runs on all pushes and PRs to main/develop)
+  # ============================================================================
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
+
+    # ==========================================================================
+    # TEST INFRASTRUCTURE (COMMENTED OUT FOR SCAFFOLDING)
+    # ==========================================================================
+    # TEMPLATE INSTRUCTIONS: Uncomment the 'services' block below when you write
+    # integration tests that require a live PostgreSQL database.
+    # services:
+    #   postgres:
+    #     image: postgres:16-alpine
+    #     env:
+    #       POSTGRES_USER: postgres
+    #       POSTGRES_PASSWORD: postgres
+    #       POSTGRES_DB: app_db_test
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd "pg_isready -U postgres"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+
+    # REDIS (OPTIONAL CACHE/EVENTS LAYER)
+    # redis:
+    #   image: redis:7-alpine
+    #   ports:
+    #     - 6379:6379
+    #   options: >-
+    #     --health-cmd "redis-cli ping"
+    #     --health-interval 10s
+    #     --health-timeout 5s
+    #     --health-retries 5
+
+    env:
+      NODE_ENV: test
+      # DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # REDIS_URL: ${{ secrets.REDIS_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      # ========================================================================
+      # BUILD & TEST EXECUTION (COMMENTED OUT FOR SCAFFOLDING)
+      # ========================================================================
+      # TEMPLATE INSTRUCTIONS: tsc will fail if there are no .ts files yet.
+      # Uncomment this when your src/ folder is populated.
+      # - name: Type check / build
+      #   run: pnpm build
+
+      # TEMPLATE INSTRUCTIONS: vitest will fail if there are no test files yet.
+      # Uncomment this when you add your first test suites.
+      # - name: Run tests
+      #   run: pnpm test
+
+  # ============================================================================
+  # 2. BUILD & PUSH DOCKER IMAGE (Runs ONLY on direct pushes/merges to main)
+  # ============================================================================
+  build-and-push:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runtime
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
+
+  # ============================================================================
+  # 3. DEPLOY TO SERVER (Runs ONLY after a successful push to GHCR)
+  # ============================================================================
+  # TEMPLATE INSTRUCTIONS: Uncomment this entire job when you have provisioned
+  # your Linux server and added the required SSH secrets to GitHub.
+  # deploy:
+  #   needs: build-and-push
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Execute SSH Deployment
+  #       uses: appleboy/ssh-action@v1.2.0
+  #       with:
+  #         # TEMPLATE INSTRUCTIONS:
+  #         # Add the following secrets to your GitHub Repository Settings (Settings > Secrets and variables > Actions):
+  #         # 1. SERVER_HOST: The IP address of your Linux server.
+  #         # 2. SERVER_USER: The SSH username (e.g., 'root' or 'ubuntu').
+  #         # 3. SERVER_SSH_KEY: The private SSH key used to log into the server.
+  #         host: ${{ secrets.SERVER_HOST }}
+  #         username: ${{ secrets.SERVER_USER }}
+  #         key: ${{ secrets.SERVER_SSH_KEY }}
+  #
+  #         script: |
+  #           # 1. Log the server into GitHub Container Registry to access private images
+  #           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+  #
+  #           # 2. Navigate to where your docker-compose.yml lives on the server
+  #           cd /path/to/your/project
+  #
+  #           # 3. Pull the fresh image that was just built in Step 2
+  #           docker compose pull api
+  #
+  #           # 4. Recreate only the containers that have changed, detached in the background
+  #           docker compose up -d
+  #
+  #           # 5. Clean up old, unused Docker images to free up server disk space
+  #           docker image prune -f
