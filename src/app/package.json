@@ -1,0 +1,22 @@
+{
+  "name": "@template/app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts"
+  },
+  "dependencies": {
+    "@template/shared-kernel": "workspace:*",
+    "awilix": "^13.0.5",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "typescript": "^6.0.3",
+    "tsx": "^4.23.13"
+  }
+}
