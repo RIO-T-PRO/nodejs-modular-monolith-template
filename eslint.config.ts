@@ -49,8 +49,8 @@ export default defineConfig(
           patterns: [
             {
               group: [
-                '**/src/shared-kernel/src/domain/**',
-                '**/src/shared-kernel/src/infrastructure/**',
+                '**/src/shared/src/domain/**',
+                '**/src/shared/src/infrastructure/**',
                 '**/src/app/src/domain/**',
                 '**/src/app/src/infrastructure/**',
               ],

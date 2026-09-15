@@ -1,6 +1,6 @@
 packages:
   - 'src/app'
-  - 'src/shared-kernel'
+  - 'src/shared'
   - 'src/modules/*'
 
 allowBuilds:

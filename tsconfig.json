@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "files": [],
-  "references": [{ "path": "./src/shared-kernel" }, { "path": "./src/app" }],
+  "references": [{ "path": "./src/shared" }, { "path": "./src/app" }],
   "include": [
     "eslint.config.ts",
     "vite.config.ts" // Any other root tooling files
