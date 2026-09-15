@@ -1,11 +1,11 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  // Outputting into the shared module's src directory so 
+  // TypeScript includes it in the rootDir compilation.
+  output   = "../src/shared/src/generated/prisma"
 }
 
 datasource db {
