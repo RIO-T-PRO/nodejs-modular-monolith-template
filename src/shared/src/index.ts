@@ -1,3 +1,10 @@
-export { env } from './config/env.js';
-export { prisma } from './config/db.js';
+export { env } from '#config/env';
 export type { User, UserProfile, RefreshToken } from './generated/prisma/client.js';
+export { HttpMessage, HttpStatus } from './constants/http-constants.js';
+export { logger, type Logger } from './lib/logger.js';
+export * from './errors/index.js';
+export { createRootContainer, type SharedCradle } from './lib/container.js';
+export { DomainEventDispatcher, type DomainEvent } from './lib/events/domain-event.js';
+export { MessageBroker, type IntegrationEvent } from './lib/events/message-broker.js';
+export type { MessageDispatcher } from './lib/events/message-dispatcher-interface.js';
+export type { AppModule, ModuleDependencies } from './lib/app-module-interface.js';
