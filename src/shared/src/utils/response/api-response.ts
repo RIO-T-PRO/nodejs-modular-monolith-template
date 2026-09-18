@@ -1,4 +1,4 @@
-import type { NextFunction, Response, Request } from 'express';
+import type { NextFunction, Response, Request, RequestHandler } from 'express';
 import { AppError } from '../../errors/app-error.js';
 import { logger } from '../../lib/logger.js';
 import { HttpStatus } from '../../constants/http-constants.js';
@@ -26,7 +26,7 @@ export class ApiResponse<T = unknown> {
     });
   }
 
-  static created<T>(data: T, meta?: Partial<ResponseMeta> | undefined): ApiResponse<T> {
+  static created<T>(data: T, meta?: Partial<ResponseMeta>): ApiResponse<T> {
     return new ApiResponse(HttpStatus.CREATED, {
       success: true,
       data,
@@ -73,18 +73,31 @@ export class ApiResponse<T = unknown> {
           err,
         },
       );
+      // Short-circuit: Return a shell; the handler layer handles dropping this gracefully
+      return new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, {
+        success: false,
+        error: { code: 'STREAM_ERROR', message: 'Headers already sent' },
+        meta: buildMeta({ requestId }),
+      });
     }
 
     if (err instanceof AppError) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       const logFn = err.isOperational ? logger.warn : logger.error;
       logFn(err.message, {
+        name: err.name,
         code: err.code,
         statusCode: err.statusCode,
         requestId,
         err,
       });
 
-      const body: ApiErrorBody = { code: err.code, message: err.message };
+      // FIX: Added name validation mapping from your custom errors
+      const body: ApiErrorBody = {
+        name: err.name,
+        code: err.code,
+        message: err.message,
+      };
       if (err.details) body.details = err.details;
 
       return new ApiResponse(err.statusCode, {
@@ -129,9 +142,11 @@ export class ApiResponse<T = unknown> {
    *
    * Usage:  router.get('/x', ApiResponse.handler(async (req) => { ... }))
    */
-  static handler = <T extends (...args: unknown[]) => Promise<unknown>>(fn: T) => {
+  static handler = (
+    fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>,
+  ): RequestHandler => {
     return (req: Request, res: Response, _next: NextFunction): void => {
-      Promise.resolve(fn(req, res))
+      Promise.resolve(fn(req, res, _next))
         .then((result) => {
           if (res.headersSent) return; // Streaming occurred directly via controller
 

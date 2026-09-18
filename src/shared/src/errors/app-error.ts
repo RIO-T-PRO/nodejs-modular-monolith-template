@@ -10,6 +10,7 @@ export interface AppErrorOptions {
    * true  = expected domain failure (logged at warn). Default: true.
    */
   isOperational?: boolean | undefined;
+  name?: string | undefined;
 }
 
 export class AppError extends Error {
@@ -23,7 +24,7 @@ export class AppError extends Error {
     options: AppErrorOptions = {},
   ) {
     super(message, { cause: options.cause });
-    this.name = this.constructor.name;
+    this.name = options.name ?? this.constructor.name;
     this.details = options.details;
     this.isOperational = options.isOperational ?? true;
     Error.captureStackTrace(this, this.constructor);
@@ -34,7 +35,7 @@ export class AppError extends Error {
   static badRequest(
     message = 'Bad request',
     code = 'BAD_REQUEST',
-    details?: Record<string, string[]> | undefined,
+    details?: Record<string, string[]>,
   ) {
     return new AppError(message, HttpStatus.BAD_REQUEST, code, { details });
   }
@@ -58,7 +59,7 @@ export class AppError extends Error {
   static unprocessable(
     message = 'Validation failed',
     code = 'VALIDATION_ERROR',
-    details?: Record<string, string[]> | undefined,
+    details?: Record<string, string[]>,
   ) {
     return new AppError(message, HttpStatus.UNPROCESSABLE, code, { details });
   }

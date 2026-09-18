@@ -17,6 +17,8 @@ export interface ResponseMeta {
 }
 
 export interface ApiErrorBody {
+  /** Explicit error class designation name, e.g. "UserNotFoundError". */
+  name?: string | undefined;
   /** Machine-readable code, e.g. "USER_NOT_FOUND", "VALIDATION_ERROR". */
   code: string;
   /** Human-readable message, safe to show to clients. */
