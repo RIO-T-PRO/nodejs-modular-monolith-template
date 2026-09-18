@@ -9,30 +9,38 @@
   "packageManager": "pnpm@12.4.1",
   "scripts": {
     "dev": "pnpm --filter @template/app dev",
-    "build": "tsc -b tsconfig.json",
+    "build": "pnpm prisma:generate && tsc -b tsconfig.json",
     "build:clean": "tsc -b tsconfig.json --clean",
     "start": "node src/app/dist/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "typecheck": "tsc -b tsconfig.json && tsc -p tests/tsconfig.json",
     "test": "vitest run",
-    "typecheck": "tsc -b tsconfig.json --dry",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "test:unit": "vitest run --project \"unit:*\"",
+    "test:integration": "vitest run --project integration",
+    "test:e2e": "vitest run --project e2e",
+    "test:cov": "vitest run --coverage --project \"unit:*\"",
+    "prisma:generate": "pnpm -r --if-present run prisma:generate",
+    "prisma:migrate": "pnpm -r --if-present run prisma:migrate"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@template/app": "workspace:*",
+    "@testcontainers/postgresql": "^11.0.0",
     "@types/node": "^24.13.4",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^5.0.0",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.6",
     "jiti": "^2.7.0",
     "prettier": "^3.9.6",
-    "prisma": "^7.10.0",
+    "supertest": "^7.1.4",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.0",
+    "zod": "^4.6.4"
   }
 }

@@ -5,7 +5,10 @@ packages:
 
 allowBuilds:
   '@prisma/engines': true
+  cpu-features: true
   esbuild: true
   prisma: true
+  protobufjs: true
+  ssh2: true
 minimumReleaseAgeExclude:
   - zod@4.6.4

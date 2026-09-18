@@ -8,7 +8,7 @@
     "dev": "tsx watch src/server.ts"
   },
   "dependencies": {
-    "@template/shared-kernel": "workspace:*",
+    "@template/shared": "workspace:*",
     "awilix": "^13.0.5",
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1"

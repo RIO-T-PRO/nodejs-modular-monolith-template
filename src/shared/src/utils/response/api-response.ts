@@ -7,10 +7,6 @@ import { buildMeta, type ApiErrorBody, type Envelope, type ResponseMeta } from '
 const requestIdOf = (res: Response): string | undefined =>
   (res.locals?.requestId as string | undefined) ?? undefined;
 
-/* -------------------------------------------------------------------------- */
-/*                              ApiResponse<T>                                */
-/* -------------------------------------------------------------------------- */
-
 export class ApiResponse<T = unknown> {
   private constructor(
     public readonly statusCode: number,
@@ -68,6 +64,17 @@ export class ApiResponse<T = unknown> {
   static fromError(err: unknown, res?: Response): ApiResponse<never> {
     const requestId = res ? requestIdOf(res) : undefined;
 
+    // If a streaming route exploded mid-stream, logs must explicitly state this
+    if (res?.headersSent) {
+      logger.error(
+        'Error occurred after HTTP headers were already sent. Cannot send JSON payload.',
+        {
+          requestId,
+          err,
+        },
+      );
+    }
+
     if (err instanceof AppError) {
       const logFn = err.isOperational ? logger.warn : logger.error;
       logFn(err.message, {
@@ -98,6 +105,8 @@ export class ApiResponse<T = unknown> {
   /* -------------------------------- Instance -------------------------------- */
 
   send(res: Response): void {
+    if (res.headersSent) return; // Safeguard if explicitly called late
+
     if (this.statusCode === HttpStatus.NO_CONTENT) {
       res.status(this.statusCode).end();
       return;
@@ -124,9 +133,32 @@ export class ApiResponse<T = unknown> {
     return (req: Request, res: Response, _next: NextFunction): void => {
       Promise.resolve(fn(req, res))
         .then((result) => {
-          if (result instanceof ApiResponse) result.send(res);
+          if (res.headersSent) return; // Streaming occurred directly via controller
+
+          // FIX NUANCE 1: If developer explicitly returns an ApiResponse instance, use it
+          if (result instanceof ApiResponse) {
+            result.send(res);
+          }
+          // Automatically safely wrap raw returns so routes never hang
+          else if (result !== undefined) {
+            ApiResponse.ok(result).send(res);
+          }
+          // If they returned undefined but forgot to stream or terminate the request manually
+          else {
+            logger.error(
+              `Route handler returned undefined without sending headers at ${req.originalUrl}`,
+            );
+            ApiResponse.fromError(new Error('Route failed to send a response payload.'), res).send(
+              res,
+            );
+          }
         })
         .catch((err: unknown) => {
+          if (res.headersSent) {
+            // Can't mutate body anymore, let global handler kick it down the line
+            _next(err);
+            return;
+          }
           ApiResponse.fromError(err, res).send(res);
         });
     };
@@ -142,7 +174,8 @@ export class ApiResponse<T = unknown> {
   static errorMiddleware = () => {
     return (err: unknown, _req: Request, res: Response, next: NextFunction): void => {
       if (res.headersSent) {
-        // Streaming started; can't send a JSON body. Let Express tear down.
+        // Trigger specific logs inside fromError, then handoff safely to standard Express stream teardown
+        ApiResponse.fromError(err, res);
         next(err);
         return;
       }

@@ -1,8 +1,12 @@
 {
   "extends": "./tsconfig.base.json",
   "files": [],
-  "references": [{ "path": "./src/shared" }, { "path": "./src/app" }],
+  "references": [
+    { "path": "./src/shared/tsconfig.build.json" },
+    { "path": "./src/app/tsconfig.build.json" }
+  ],
   "include": [
+    // eslint must be included so that import.meta.dirname work
     "eslint.config.ts",
     "vite.config.ts" // Any other root tooling files
   ]

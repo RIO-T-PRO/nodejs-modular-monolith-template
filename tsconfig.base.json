@@ -1,27 +1,21 @@
 {
   "compilerOptions": {
     "target": "ES2023",
+    "lib": ["ES2023"],
+    "types": ["node"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "types": ["node"],
-    "lib": ["ES2023"],
+    "customConditions": ["development"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
     "composite": true,
-    "incremental": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "customConditions": ["development"],
-    "resolvePackageJsonImports": true,
-    "resolvePackageJsonExports": true
+    "declarationMap": true,
+    "sourceMap": true
   }
 }
