@@ -1,6 +1,7 @@
 import { HttpStatus } from '../constants/http-constants.js';
 
 export interface AppErrorOptions {
+  name?: string | undefined;
   /** Field-level validation details, e.g. { email: ['Invalid format'] } */
   details?: Record<string, string[]> | undefined;
   /** Underlying error, preserved for logs (never sent to the client). */
@@ -10,7 +11,6 @@ export interface AppErrorOptions {
    * true  = expected domain failure (logged at warn). Default: true.
    */
   isOperational?: boolean | undefined;
-  name?: string | undefined;
 }
 
 export class AppError extends Error {

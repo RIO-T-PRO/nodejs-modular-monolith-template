@@ -8,10 +8,12 @@ import type { MessageDispatcher } from './message-dispatcher-interface.js';
 export class MemoryMessageDispatcher implements MessageDispatcher {
   private emitter = new EventEmitter();
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async publish(channel: string, message: string): Promise<void> {
     this.emitter.emit(channel, message);
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async subscribe(channel: string, handler: (message: string) => void): Promise<void> {
     this.emitter.on(channel, handler);
   }

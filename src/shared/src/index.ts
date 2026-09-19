@@ -9,12 +9,14 @@ export { logger, type Logger, type LogLevel } from './lib/logger.js';
 
 // Response
 export {
-  ApiResponse,
   buildMeta,
+  requestIdOf,
   type Envelope,
   type ApiErrorBody,
   type ResponseMeta,
 } from './utils/response/index.js';
+
+export { ApiResponse } from './lib/api-response.js';
 
 // Module contract
 export type { AppModule, ModuleDependencies } from './lib/app-module-interface.js';

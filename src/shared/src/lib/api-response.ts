@@ -1,11 +1,14 @@
 import type { NextFunction, Response, Request, RequestHandler } from 'express';
-import { AppError } from '../../errors/app-error.js';
-import { logger } from '../../lib/logger.js';
-import { HttpStatus } from '../../constants/http-constants.js';
-import { buildMeta, type ApiErrorBody, type Envelope, type ResponseMeta } from './envelope.js';
-
-const requestIdOf = (res: Response): string | undefined =>
-  (res.locals?.requestId as string | undefined) ?? undefined;
+import {
+  buildMeta,
+  type ApiErrorBody,
+  type Envelope,
+  type ResponseMeta,
+} from '../utils/response/envelope.js';
+import { HttpStatus } from '../constants/http-constants.js';
+import { requestIdOf } from '../utils/response/requested-id.js';
+import { AppError } from '../errors/app-error.js';
+import { logger } from './logger.js';
 
 export class ApiResponse<T = unknown> {
   private constructor(
