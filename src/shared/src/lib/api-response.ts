@@ -59,24 +59,22 @@ export class ApiResponse<T = unknown> {
   }
 
   /**
-   * Turn ANY thrown value into an ApiResponse. Single source of truth for
+   * Turn ANY thrown value into an ApiResponse — the single source of truth for
    * "what does the client see when something goes wrong".
-   *   - AppError      → its own status/code/message/details (logged at warn)
-   *   - anything else → opaque 500 (logged at error, full stack)
+   *   - AppError      → its own status/code/message/details (warn if operational, error otherwise)
+   *   - anything else → opaque 500 (logged at error with full stack)
    */
   static fromError(err: unknown, res?: Response): ApiResponse<never> {
     const requestId = res ? requestIdOf(res) : undefined;
 
-    // If a streaming route exploded mid-stream, logs must explicitly state this
+    // Body already flushed (streaming, SSE, manually-ended route) — we can't
+    // send JSON anymore. Log the situation and hand back a shell; callers
+    // decide whether to tear the stream down.
     if (res?.headersSent) {
       logger.error(
-        'Error occurred after HTTP headers were already sent. Cannot send JSON payload.',
-        {
-          requestId,
-          err,
-        },
+        { requestId, err },
+        'Error occurred after HTTP headers were already sent — cannot send JSON payload',
       );
-      // Short-circuit: Return a shell; the handler layer handles dropping this gracefully
       return new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, {
         success: false,
         error: { code: 'STREAM_ERROR', message: 'Headers already sent' },
@@ -85,17 +83,17 @@ export class ApiResponse<T = unknown> {
     }
 
     if (err instanceof AppError) {
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      const logFn = err.isOperational ? logger.warn : logger.error;
-      logFn(err.message, {
+      const meta = {
         name: err.name,
         code: err.code,
         statusCode: err.statusCode,
         requestId,
         err,
-      });
+      };
+      // Operational = expected domain failure → warn. Non-operational = bug → error.
+      if (err.isOperational) logger.warn(meta, err.message);
+      else logger.error(meta, err.message);
 
-      // FIX: Added name validation mapping from your custom errors
       const body: ApiErrorBody = {
         name: err.name,
         code: err.code,
@@ -110,7 +108,7 @@ export class ApiResponse<T = unknown> {
       });
     }
 
-    logger.error('Unhandled error', { requestId, err });
+    logger.error({ requestId, err }, 'Unhandled error');
     return new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, {
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Something went wrong' },
@@ -121,7 +119,7 @@ export class ApiResponse<T = unknown> {
   /* -------------------------------- Instance -------------------------------- */
 
   send(res: Response): void {
-    if (res.headersSent) return; // Safeguard if explicitly called late
+    if (res.headersSent) return;
 
     if (this.statusCode === HttpStatus.NO_CONTENT) {
       res.status(this.statusCode).end();
@@ -140,41 +138,45 @@ export class ApiResponse<T = unknown> {
 
   /**
    * Wrap an async route handler. Sends the returned `ApiResponse`, or
-   * converts any thrown value via `fromError`. No next() on error — once
-   * we've sent the envelope, Express has nothing left to do.
+   * converts any thrown value via `fromError`.
    *
    * Usage:  router.get('/x', ApiResponse.handler(async (req) => { ... }))
    */
   static handler = (
     fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>,
   ): RequestHandler => {
-    return (req: Request, res: Response, _next: NextFunction): void => {
-      Promise.resolve(fn(req, res, _next))
+    return (req: Request, res: Response, next: NextFunction): void => {
+      Promise.resolve(fn(req, res, next))
         .then((result) => {
-          if (res.headersSent) return; // Streaming occurred directly via controller
+          // Route streamed / wrote the response directly — nothing to do.
+          if (res.headersSent) return;
 
-          // FIX NUANCE 1: If developer explicitly returns an ApiResponse instance, use it
+          // Explicit ApiResponse → send as-is.
           if (result instanceof ApiResponse) {
             result.send(res);
+            return;
           }
-          // Automatically safely wrap raw returns so routes never hang
-          else if (result !== undefined) {
+
+          // Raw return value → wrap in a 200 envelope.
+          if (result !== undefined) {
             ApiResponse.ok(result).send(res);
+            return;
           }
-          // If they returned undefined but forgot to stream or terminate the request manually
-          else {
-            logger.error(
-              `Route handler returned undefined without sending headers at ${req.originalUrl}`,
-            );
-            ApiResponse.fromError(new Error('Route failed to send a response payload.'), res).send(
-              res,
-            );
-          }
+
+          // undefined + no headers = programmer error. Log with context so
+          // the offending route is obvious, then return an opaque 500.
+          logger.error(
+            { url: req.originalUrl, method: req.method },
+            'Route handler returned undefined without sending a response',
+          );
+          ApiResponse.fromError(new Error('Route failed to send a response payload.'), res).send(
+            res,
+          );
         })
         .catch((err: unknown) => {
+          // Body already flushed — hand off to Express for socket teardown.
           if (res.headersSent) {
-            // Can't mutate body anymore, let global handler kick it down the line
-            _next(err);
+            next(err);
             return;
           }
           ApiResponse.fromError(err, res).send(res);
@@ -192,8 +194,9 @@ export class ApiResponse<T = unknown> {
   static errorMiddleware = () => {
     return (err: unknown, _req: Request, res: Response, next: NextFunction): void => {
       if (res.headersSent) {
-        // Trigger specific logs inside fromError, then handoff safely to standard Express stream teardown
-        ApiResponse.fromError(err, res);
+        // fromError handles the STREAM_ERROR logging; then let Express tear
+        // the socket down. `void` because the return value is unused here.
+        void ApiResponse.fromError(err, res);
         next(err);
         return;
       }

@@ -1,27 +1,80 @@
 import { Redis } from 'ioredis';
+import type { Logger } from '../logger.js';
 import type { MessageDispatcher } from './message-dispatcher-interface.js';
 
 /**
- * @environment MULTI-SERVER PRODUCTION ONLY
- * Requires a running Redis instance for horizontal scaling.
+ * Redis pub/sub transport for multi-server production deployments.
+ * One subscriber connection fans out to N handlers registered per channel,
+ * so we never accumulate `'message'` listeners.
  */
 export class RedisMessageDispatcher implements MessageDispatcher {
-  private publisher: Redis;
-  private subscriber: Redis;
+  private readonly publisher: Redis;
+  private readonly subscriber: Redis;
+  private readonly handlers = new Map<string, Set<(message: string) => void>>();
+  private disposed = false;
 
-  constructor(redisUrl: string) {
+  constructor(
+    redisUrl: string,
+    private readonly logger: Logger,
+  ) {
     this.publisher = new Redis(redisUrl);
     this.subscriber = new Redis(redisUrl);
+
+    // ioredis emits `error` on the client; without a listener Node will crash.
+    this.publisher.on('error', (err) => this.logger.error({ err }, 'redis publisher error'));
+    this.subscriber.on('error', (err) => this.logger.error({ err }, 'redis subscriber error'));
+
+    // Single fan-out listener; per-channel handlers live in the Map.
+    this.subscriber.on('message', (channel, message) => {
+      const set = this.handlers.get(channel);
+      if (!set) return;
+      for (const handler of set) {
+        // One bad handler must not prevent others from running.
+        try {
+          handler(message);
+        } catch (err) {
+          this.logger.error({ err, channel }, 'redis handler threw');
+        }
+      }
+    });
   }
 
   async publish(channel: string, message: string): Promise<void> {
+    if (this.disposed) return;
     await this.publisher.publish(channel, message);
   }
 
-  async subscribe(channel: string, handler: (message: string) => void): Promise<void> {
-    await this.subscriber.subscribe(channel);
-    this.subscriber.on('message', (receivedChannel: string, message: string) => {
-      if (receivedChannel === channel) handler(message);
-    });
+  async subscribe(channel: string, handler: (message: string) => void): Promise<() => void> {
+    if (this.disposed) return () => {};
+
+    let set = this.handlers.get(channel);
+    if (!set) {
+      set = new Set();
+      this.handlers.set(channel, set);
+      // Only issue SUBSCRIBE the first time we see this channel.
+      await this.subscriber.subscribe(channel);
+    }
+    set.add(handler);
+
+    return () => {
+      const current = this.handlers.get(channel);
+      if (!current) return;
+      current.delete(handler);
+      // Last handler for the channel → drop the Redis subscription too.
+      if (current.size === 0) {
+        this.handlers.delete(channel);
+        void this.subscriber.unsubscribe(channel).catch((err) => {
+          this.logger.error({ err, channel }, 'redis unsubscribe failed');
+        });
+      }
+    };
+  }
+
+  async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.handlers.clear();
+    // allSettled so a slow/failed quit on one connection doesn't block the other.
+    await Promise.allSettled([this.publisher.quit(), this.subscriber.quit()]);
   }
 }

@@ -1,15 +1,20 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(4001),
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-  REDIS_URL: z.string(),
-  //   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
-  //   JWT_EXPIRES_IN: z.string().default('1d'),
-  MESSAGE_DISPATCHER: z.enum(['memory', 'redis']).default('memory'),
-});
+const envSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    PORT: z.coerce.number().default(4001),
+    DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    // Optional at the schema level; the refinement below enforces it only
+    // when MESSAGE_DISPATCHER=redis.
+    REDIS_URL: z.string().url().optional(),
+    MESSAGE_DISPATCHER: z.enum(['memory', 'redis']).default('memory'),
+  })
+  .refine((v) => v.MESSAGE_DISPATCHER !== 'redis' || !!v.REDIS_URL, {
+    message: 'REDIS_URL is required when MESSAGE_DISPATCHER=redis',
+    path: ['REDIS_URL'],
+  });
 
 const parsed = envSchema.safeParse(process.env);
 
@@ -21,3 +26,6 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+/** Shape of the validated env object. Use this instead of `typeof env` at call sites. */
+export type Env = typeof env;

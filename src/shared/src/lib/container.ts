@@ -1,46 +1,66 @@
 import { createContainer as createAwilixContainer, asValue, InjectionMode } from 'awilix';
 import type { AwilixContainer } from 'awilix';
 import type { PrismaClient } from '../generated/prisma/client.js';
-import { env } from '#config/env';
+import { env, type Env } from '#config/env';
 import { logger, type Logger } from './logger.js';
 import createPrismaClient from './prisma.js';
 import { MessageBroker } from './events/message-broker.js';
 import { MemoryMessageDispatcher } from './events/memory-message-dispatcher.js';
 import { RedisMessageDispatcher } from './events/redis-message-dispatcher.js';
-
-// Every dependency any module might need from the shared kernel.
-// Modules register their OWN services into this SAME container under
-// their own keys — they never construct a container of their own.
-//
-// Note: DomainEventDispatcher is deliberately NOT registered here.
-// Domain events never leave the module that raised them, so each
-// module constructs (and injects) its own dispatcher instance in its
-// register() function — sharing one instance across modules here would
-// silently let module A's handlers hear module B's domain events.
+import type { MessageDispatcher } from './events/message-dispatcher-interface.js';
 
 export interface SharedCradle {
-  env: typeof env;
+  env: Env;
   logger: Logger;
   prisma: PrismaClient;
   messageBroker: MessageBroker;
 }
 
-export const createRootContainer = (): AwilixContainer<SharedCradle> => {
+/**
+ * Resources the app shell must close on shutdown. Returned alongside the
+ * container so lifecycle stays explicit — the container handles wiring,
+ * the shell handles teardown.
+ */
+export interface RootResources {
+  dispose(): Promise<void>;
+}
+
+const createDispatcher = (config: Env): MessageDispatcher => {
+  if (config.MESSAGE_DISPATCHER === 'redis') {
+    if (!config.REDIS_URL) {
+      throw new Error('REDIS_URL is required when MESSAGE_DISPATCHER=redis');
+    }
+    return new RedisMessageDispatcher(config.REDIS_URL, logger);
+  }
+  return new MemoryMessageDispatcher();
+};
+
+export async function createRootContainer(): Promise<{
+  container: AwilixContainer<SharedCradle>;
+  resources: RootResources;
+}> {
   const container = createAwilixContainer<SharedCradle>({
     injectionMode: InjectionMode.PROXY,
   });
 
-  const dispatcher =
-    env.MESSAGE_DISPATCHER === 'redis'
-      ? new RedisMessageDispatcher(env.REDIS_URL)
-      : new MemoryMessageDispatcher();
+  const prisma = createPrismaClient(env);
+  await prisma.$connect();
+
+  const messageBroker = new MessageBroker(createDispatcher(env), logger);
 
   container.register({
     env: asValue(env),
     logger: asValue(logger),
-    prisma: asValue(createPrismaClient()),
-    messageBroker: asValue(new MessageBroker(dispatcher)),
+    prisma: asValue(prisma),
+    messageBroker: asValue(messageBroker),
   });
 
-  return container;
-};
+  const resources: RootResources = {
+    async dispose() {
+      // allSettled: a slow/failed close on one resource must not block the other.
+      await Promise.allSettled([prisma.$disconnect(), messageBroker.dispose()]);
+    },
+  };
+
+  return { container, resources };
+}

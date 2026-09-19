@@ -1,10 +1,18 @@
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
+// Call shapes the logger accepts.
+type LogFn = {
+  (message: string): void;
+  (meta: Record<string, unknown>, message: string): void;
+};
+
 export interface Logger {
-  info(message: string, meta?: Record<string, unknown>): void;
-  warn(message: string, meta?: Record<string, unknown>): void;
-  error(message: string, meta?: Record<string, unknown>): void;
-  debug(message: string, meta?: Record<string, unknown>): void;
+  info: LogFn;
+  warn: LogFn;
+  error: LogFn;
+  debug: LogFn;
+  /** Returns a logger that merges `bound` into every entry's meta. */
+  child(bound: Record<string, unknown>): Logger;
 }
 
 /**
@@ -38,20 +46,45 @@ const write = (level: LogLevel, line: string): void => {
   }
 };
 
-const log = (level: LogLevel, message: string, meta?: Record<string, unknown>): void => {
-  // Canonical fields first, caller data nested under `meta` — no key collisions.
-  const entry = {
-    level,
-    message,
-    timestamp: new Date().toISOString(),
-    meta: normalizeMeta(meta),
-  };
-  write(level, JSON.stringify(entry));
+// Distinguish `logger.info('msg')` from `logger.info({...}, 'msg')` at runtime
+// so both call shapes route to the same internal function.
+const splitArgs = (
+  a: Record<string, unknown> | string,
+  b?: string,
+): { meta?: Record<string, unknown>; message: string } => {
+  if (typeof a === 'string') return { message: a };
+  return { meta: a, message: b ?? '' };
 };
 
-export const logger: Logger = {
-  info: (message, meta) => log('info', message, meta),
-  warn: (message, meta) => log('warn', message, meta),
-  error: (message, meta) => log('error', message, meta),
-  debug: (message, meta) => log('debug', message, meta),
+const buildLogger = (bound: Record<string, unknown>): Logger => {
+  const log = (level: LogLevel, a: Record<string, unknown> | string, b?: string): void => {
+    const { meta, message } = splitArgs(a, b);
+
+    // Canonical fields first, caller data nested under `meta` — no key
+    // collisions. `bound` (from .child()) is merged under the caller meta so
+    // per-call values can still override it.
+    const entry = {
+      level,
+      message,
+      timestamp: new Date().toISOString(),
+      meta: normalizeMeta({ ...bound, ...meta }),
+    };
+    write(level, JSON.stringify(entry));
+  };
+
+  // Local shim typed as LogFn so the overloads are satisfied without `any`.
+  const boundFn = (level: LogLevel): LogFn => {
+    const fn = (a: Record<string, unknown> | string, b?: string): void => log(level, a, b);
+    return fn;
+  };
+
+  return {
+    info: boundFn('info'),
+    warn: boundFn('warn'),
+    error: boundFn('error'),
+    debug: boundFn('debug'),
+    child: (extra) => buildLogger({ ...bound, ...extra }),
+  };
 };
+
+export const logger: Logger = buildLogger({});

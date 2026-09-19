@@ -1,8 +1,10 @@
 /**
- * DOMAIN EVENTS (Local, Synchronous, In-Memory)
+ * DOMAIN EVENTS (local, synchronous, in-memory).
  *
- * @usage Use this for immediate side effects within the SAME module/feature.
- * @rules NEVER cross module boundaries. Handled synchronously.
+ * Rules:
+ *  - NEVER cross module boundaries.
+ *  - Each module owns its own instance, created inside its register() function.
+ *  - Handled in-process; no serialization, no transport.
  */
 export interface DomainEvent<TPayload = unknown> {
   readonly name: string;
@@ -13,18 +15,28 @@ export interface DomainEvent<TPayload = unknown> {
 type Handler<T> = (event: DomainEvent<T>) => void | Promise<void>;
 
 export class DomainEventDispatcher {
-  private handlers = new Map<string, Handler<unknown>[]>();
+  private readonly handlers = new Map<string, Set<Handler<unknown>>>();
 
-  on<T>(eventName: string, handler: Handler<T>): void {
-    const list = this.handlers.get(eventName) ?? [];
-    list.push(handler as Handler<unknown>);
-    this.handlers.set(eventName, list);
+  /** Returns an unsubscribe function so callers can clean up on teardown. */
+  on<T>(eventName: string, handler: Handler<T>): () => void {
+    let set = this.handlers.get(eventName);
+    if (!set) {
+      set = new Set();
+      this.handlers.set(eventName, set);
+    }
+    const typed = handler as Handler<unknown>;
+    set.add(typed);
+    return () => set.delete(typed);
   }
 
   async dispatch(event: DomainEvent): Promise<void> {
-    const list = this.handlers.get(event.name) ?? [];
-    for (const handler of list) {
-      await handler(event);
-    }
+    const set = this.handlers.get(event.name);
+    if (!set) return;
+    // allSettled: one failing handler must not prevent the others from running.
+    await Promise.allSettled([...set].map((h) => Promise.resolve(h(event))));
+  }
+
+  clear(): void {
+    this.handlers.clear();
   }
 }

@@ -1,20 +1,27 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { EventEmitter } from 'node:events';
 import type { MessageDispatcher } from './message-dispatcher-interface.js';
 
 /**
- * @environment LOCAL, TESTING, or SINGLE-SERVER PRODUCTION
- * Zero infrastructure dependencies. NO Redis required.
+ * In-process transport for local dev, tests, and single-server deployments.
+ * No external infrastructure required.
  */
 export class MemoryMessageDispatcher implements MessageDispatcher {
-  private emitter = new EventEmitter();
+  private readonly emitter = new EventEmitter();
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async publish(channel: string, message: string): Promise<void> {
     this.emitter.emit(channel, message);
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async subscribe(channel: string, handler: (message: string) => void): Promise<void> {
+  async subscribe(channel: string, handler: (message: string) => void): Promise<() => void> {
     this.emitter.on(channel, handler);
+    return () => {
+      this.emitter.off(channel, handler);
+    };
+  }
+
+  // No external resources, but we keep the shape consistent.
+  async dispose(): Promise<void> {
+    this.emitter.removeAllListeners();
   }
 }

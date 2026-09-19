@@ -1,24 +1,34 @@
-import type { Express } from 'express';
+import type { Router } from 'express';
 import type { AwilixContainer } from 'awilix';
 import type { SharedCradle } from './container.js';
 
-export interface ModuleDependencies {
-  container: AwilixContainer<SharedCradle>;
+/**
+ * What a module returns after registering. The shell uses `router` to mount
+ * HTTP and `dispose` to tear down the module's scoped container and any
+ * integration-event subscriptions it opened.
+ */
+export interface LoadedModule {
+  readonly name: string;
+  readonly basePath: string;
+  readonly router: Router;
+  dispose(): Promise<void>;
 }
 
-// The contract every module must implement to be loaded by the app shell.
-// This is the ENTIRE surface the shell knows about — it never reaches
-// into a module's domain/application/infrastructure layers directly.
-
+/**
+ * Contract every module implements.
+ *
+ * A module receives the root container and must:
+ *   1. Create its OWN scope (root.createScope<ModuleCradle>()).
+ *   2. Register its repositories/services into that scope.
+ *   3. Subscribe to integration events it cares about.
+ *   4. Return a router and a dispose function.
+ *
+ * Modules NEVER resolve each other's services from the root container.
+ */
 export interface AppModule {
-  /** Unique, human-readable module name (used in logs). */
   readonly name: string;
-  /** Express path prefix this module's routes are mounted under. */
   readonly basePath: string;
-  /**
-   * Called once at boot. Register the module's own DI registrations
-   * (repositories, services) into a scoped container, mount its Express
-   * router, and subscribe to any integration events it cares about.
-   */
-  register(app: Express, deps: ModuleDependencies): void | Promise<void>;
+  /** Names of modules that must be registered before this one. */
+  readonly dependsOn?: readonly string[];
+  register(root: AwilixContainer<SharedCradle>): Promise<LoadedModule>;
 }
