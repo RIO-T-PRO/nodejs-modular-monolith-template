@@ -1,3 +1,14 @@
+// Primsa
+export {
+  Prisma,
+  PrismaClient,
+  type User,
+  type RefreshToken,
+  type UserProfile,
+} from './generated/prisma/client.js';
+
+export { omitProperty } from './lib/db/omit-prisma-property.js';
+
 // Constants
 export { HttpStatus, HttpStatusName, type HttpStatusCode } from './constants/index.js';
 
@@ -24,6 +35,9 @@ export {
   // Container
   createRootContainer,
   type SharedCradle,
+
+  // Inject
+  type Inject,
 } from './lib/app/index.js';
 
 // Events

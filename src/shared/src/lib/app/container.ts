@@ -26,10 +26,10 @@ const createDispatcher = (config: Env): MessageDispatcher => {
   return new MemoryMessageDispatcher();
 };
 
-export async function createRootContainer(): Promise<{
+export const createRootContainer = async (): Promise<{
   container: AwilixContainer<SharedCradle>;
   resources: RootResources;
-}> {
+}> => {
   const container = createAwilixContainer<SharedCradle>({
     injectionMode: InjectionMode.PROXY,
   });
@@ -54,4 +54,4 @@ export async function createRootContainer(): Promise<{
   };
 
   return { container, resources };
-}
+};
