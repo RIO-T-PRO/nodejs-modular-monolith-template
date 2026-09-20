@@ -6,11 +6,7 @@
  *  - Each module owns its own instance, created inside its register() function.
  *  - Handled in-process; no serialization, no transport.
  */
-export interface DomainEvent<TPayload = unknown> {
-  readonly name: string;
-  readonly payload: TPayload;
-  readonly occurredAt: Date;
-}
+import type { DomainEvent } from './interfaces/domain-event-interface.js';
 
 type Handler<T> = (event: DomainEvent<T>) => void | Promise<void>;
 

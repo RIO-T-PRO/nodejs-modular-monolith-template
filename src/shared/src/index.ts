@@ -2,10 +2,12 @@
 export { HttpStatus, HttpStatusName, type HttpStatusCode } from './constants/http-constants.js';
 
 // Errors
-export { AppError, type AppErrorOptions } from './errors/app-error.js';
+export { AppError } from './errors/app-error.js';
+export type { AppErrorOptions } from './errors/interfaces/app-error-interface.js';
 
 // Logger
-export { logger, type Logger, type LogLevel } from './lib/logger.js';
+export { logger, type LogLevel } from './lib/logger/logger.js';
+export type { Logger } from './lib/logger/interfaces/logger-interface.js';
 
 // Response
 export {
@@ -14,17 +16,20 @@ export {
   type Envelope,
   type ApiErrorBody,
   type ResponseMeta,
-} from './utils/response/index.js';
+} from './lib/response/index.js';
 
-export { ApiResponse } from './lib/api-response.js';
+export { ApiResponse } from './lib/response/api-response.js';
 
 // Module contract
-export type { AppModule, ModuleDependencies } from './lib/app-module-interface.js';
+export type { AppModule } from './lib/app/interfaces/app-module-interface.js';
 
 // Container
-export { createRootContainer, type SharedCradle } from './lib/container.js';
+export { createRootContainer } from './lib/app/container.js';
+export type { SharedCradle } from './lib/app/interfaces/shared-cradle-interface.js';
 
 // Events
-export { DomainEventDispatcher, type DomainEvent } from './lib/events/domain-event.js';
-export { MessageBroker, type IntegrationEvent } from './lib/events/message-broker.js';
-export type { MessageDispatcher } from './lib/events/message-dispatcher-interface.js';
+export { DomainEventDispatcher } from './lib/events/domain-event.js';
+export type { DomainEvent } from './lib/events/interfaces/domain-event-interface.js';
+export { MessageBroker } from './lib/events/message-broker.js';
+export type { IntegrationEvent } from './lib/events/interfaces/integration-event-interface.js';
+export type { MessageDispatcher } from './lib/events/interfaces/message-dispatcher-interface.js';

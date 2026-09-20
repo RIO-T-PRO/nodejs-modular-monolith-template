@@ -1,14 +1,9 @@
 import type { NextFunction, Response, Request, RequestHandler } from 'express';
-import {
-  buildMeta,
-  type ApiErrorBody,
-  type Envelope,
-  type ResponseMeta,
-} from '../utils/response/envelope.js';
-import { HttpStatus } from '../constants/http-constants.js';
-import { requestIdOf } from '../utils/response/requested-id.js';
-import { AppError } from '../errors/app-error.js';
-import { logger } from './logger.js';
+import { buildMeta, type ApiErrorBody, type Envelope, type ResponseMeta } from './envelope.js';
+import { HttpStatus } from '../../constants/http-constants.js';
+import { requestIdOf } from './requested-id.js';
+import { logger } from '../logger/logger.js';
+import { AppError } from '../../errors/app-error.js';
 
 export class ApiResponse<T = unknown> {
   private constructor(

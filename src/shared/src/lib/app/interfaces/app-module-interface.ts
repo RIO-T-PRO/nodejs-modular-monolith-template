@@ -1,6 +1,6 @@
 import type { Router } from 'express';
 import type { AwilixContainer } from 'awilix';
-import type { SharedCradle } from './container.js';
+import type { SharedCradle } from './shared-cradle-interface.js';
 
 /**
  * What a module returns after registering. The shell uses `router` to mount

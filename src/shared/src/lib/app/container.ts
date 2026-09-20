@@ -1,29 +1,20 @@
 import { createContainer as createAwilixContainer, asValue, InjectionMode } from 'awilix';
 import type { AwilixContainer } from 'awilix';
-import type { PrismaClient } from '../generated/prisma/client.js';
 import { env, type Env } from '#config/env';
-import { logger, type Logger } from './logger.js';
-import createPrismaClient from './prisma.js';
-import { MessageBroker } from './events/message-broker.js';
-import { MemoryMessageDispatcher } from './events/memory-message-dispatcher.js';
-import { RedisMessageDispatcher } from './events/redis-message-dispatcher.js';
-import type { MessageDispatcher } from './events/message-dispatcher-interface.js';
-
-export interface SharedCradle {
-  env: Env;
-  logger: Logger;
-  prisma: PrismaClient;
-  messageBroker: MessageBroker;
-}
+import { logger } from '../logger/logger.js';
+import createPrismaClient from '../db/prisma.js';
+import { MessageBroker } from '../events/message-broker.js';
+import { MemoryMessageDispatcher } from '../events/memory-message-dispatcher.js';
+import { RedisMessageDispatcher } from '../events/redis-message-dispatcher.js';
+import type { MessageDispatcher } from '../events/interfaces/message-dispatcher-interface.js';
+import type { SharedCradle } from './interfaces/shared-cradle-interface.js';
 
 /**
  * Resources the app shell must close on shutdown. Returned alongside the
  * container so lifecycle stays explicit — the container handles wiring,
  * the shell handles teardown.
  */
-export interface RootResources {
-  dispose(): Promise<void>;
-}
+import type { RootResources } from './interfaces/root-resources-interface.js';
 
 const createDispatcher = (config: Env): MessageDispatcher => {
   if (config.MESSAGE_DISPATCHER === 'redis') {

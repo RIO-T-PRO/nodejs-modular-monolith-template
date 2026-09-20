@@ -1,11 +1,12 @@
 import { Redis } from 'ioredis';
-import type { Logger } from '../logger.js';
-import type { MessageDispatcher } from './message-dispatcher-interface.js';
+import type { Logger } from '../logger/logger.js';
+import type { MessageDispatcher } from './interfaces/message-dispatcher-interface.js';
 
 /**
- * Redis pub/sub transport for multi-server production deployments.
- * One subscriber connection fans out to N handlers registered per channel,
- * so we never accumulate `'message'` listeners.
+ * Redis pub/sub transport. Choose this ONLY when the app runs as more than
+ * one process that must share events; otherwise MemoryMessageDispatcher is
+ * correct. Pub/sub is fire-and-forget — no persistence, no ordering, no
+ * redelivery. One subscriber connection, many handlers per channel.
  */
 export class RedisMessageDispatcher implements MessageDispatcher {
   private readonly publisher: Redis;

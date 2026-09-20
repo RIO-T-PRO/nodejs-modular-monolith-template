@@ -1,19 +1,13 @@
 import { z } from 'zod';
-import type { Logger } from '../logger.js';
-import type { MessageDispatcher } from './message-dispatcher-interface.js';
+import type { Logger } from '../logger/logger.js';
+import type { MessageDispatcher } from './interfaces/message-dispatcher-interface.js';
 
 /**
  * INTEGRATION EVENTS (cross-module, asynchronous).
  * The wire format carries payload as JSON plus metadata so consumers on the
  * other side can validate and trace it.
  */
-export interface IntegrationEvent<TPayload = unknown> {
-  readonly name: string;
-  readonly payload: TPayload;
-  readonly occurredAt: string;
-  /** Optional; propagated across module boundaries for tracing. */
-  readonly correlationId?: string;
-}
+import type { IntegrationEvent } from './interfaces/integration-event-interface.js';
 
 // Runtime contract for anything that comes off the wire. Consumers must not
 // trust the shape of an inbound message, even from a sibling module.
