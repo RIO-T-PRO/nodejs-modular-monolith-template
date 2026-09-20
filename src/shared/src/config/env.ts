@@ -8,7 +8,7 @@ const envSchema = z
     DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
     // Optional at the schema level; the refinement below enforces it only
     // when MESSAGE_DISPATCHER=redis.
-    REDIS_URL: z.string().url().optional(),
+    REDIS_URL: z.url().optional(),
     MESSAGE_DISPATCHER: z.enum(['memory', 'redis']).default('memory'),
   })
   .refine((v) => v.MESSAGE_DISPATCHER !== 'redis' || !!v.REDIS_URL, {

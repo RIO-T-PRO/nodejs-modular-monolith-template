@@ -8,13 +8,13 @@ import { MemoryMessageDispatcher } from '../events/memory-message-dispatcher.js'
 import { RedisMessageDispatcher } from '../events/redis-message-dispatcher.js';
 import type { MessageDispatcher } from '../events/interfaces/message-dispatcher-interface.js';
 import type { SharedCradle } from './interfaces/shared-cradle-interface.js';
+import type { RootResources } from './interfaces/root-resources-interface.js';
 
 /**
  * Resources the app shell must close on shutdown. Returned alongside the
  * container so lifecycle stays explicit — the container handles wiring,
  * the shell handles teardown.
  */
-import type { RootResources } from './interfaces/root-resources-interface.js';
 
 const createDispatcher = (config: Env): MessageDispatcher => {
   if (config.MESSAGE_DISPATCHER === 'redis') {
