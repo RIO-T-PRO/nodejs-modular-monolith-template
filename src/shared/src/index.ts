@@ -38,7 +38,7 @@ export {
 
   // Inject
   type Inject,
-} from './lib/app/index.js';
+} from './lib/container/index.js';
 
 // Events
 export {

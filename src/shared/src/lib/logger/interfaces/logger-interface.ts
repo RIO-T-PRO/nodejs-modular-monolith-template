@@ -1,7 +1,7 @@
 // Call shapes the logger accepts.
 export type LogFn = {
   (message: string): void;
-  (meta: Record<string, unknown>, message: string): void;
+  (meta: Record<string, unknown>, message?: string): void; // ✓ matches { a: 1 }
 };
 
 export interface Logger {

@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import type { Logger } from '../logger/logger.js';
+import type { Logger } from '../logger/interfaces/logger-interface.js';
 import type { MessageDispatcher } from './interfaces/message-dispatcher-interface.js';
 
 /**
