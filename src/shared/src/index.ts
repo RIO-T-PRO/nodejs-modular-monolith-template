@@ -42,6 +42,7 @@ export { Validate } from './lib/middleware/index.js';
 export {
   // Module contract
   type AppModule,
+  type LoadedModule,
 
   // Container
   createRootContainer,

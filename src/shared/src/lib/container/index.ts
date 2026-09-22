@@ -1,5 +1,5 @@
 // Module contract
-export type { AppModule } from './interfaces/app-module-interface.js';
+export type { AppModule, LoadedModule } from './interfaces/app-module-interface.js';
 
 // Container
 export { createRootContainer } from './container.js';
