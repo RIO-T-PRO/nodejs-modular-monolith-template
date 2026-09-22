@@ -43,6 +43,7 @@ export {
   // Module contract
   type AppModule,
   type LoadedModule,
+  type RootResources,
 
   // Container
   createRootContainer,
@@ -60,3 +61,6 @@ export {
   type MessageDispatcher,
   type IntegrationEvent,
 } from './lib/events/index.js';
+
+// env
+export { env } from '#config/env';

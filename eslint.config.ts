@@ -15,8 +15,8 @@ interface Module {
 
 // Add a module here when you create it. `name` must match its package.json exactly.
 const modules: Module[] = [
-  { dir: 'user', name: `${scope}/user-module` },
-  { dir: 'refresh_token', name: `${scope}/refresh-token-module` }, // adjust to your real package name
+  { dir: 'user', name: `${scope}/users-module` },
+  // { dir: 'refresh_token', name: `${scope}/refresh-token-module` }, // adjust to your real package name
 ];
 
 const packageSrc = (dir: string) => `src/${dir}/src/**/*.ts`; // shared, app
@@ -102,7 +102,7 @@ export default defineConfig(
   // Handlers return data / ApiResponse and let ApiResponse.handler send it.
   // The contract test is the real guarantee; this just catches the obvious cases.
   {
-    files: modules.map((m) => `src/modules/${m.dir}/src/**/http/**/*.ts`),
+    files: modules.map((m) => `src/modules/${m.dir}/src/**/infrastructure/**/*.ts`),
     ignores: ['**/*.test.ts'],
     rules: {
       'no-restricted-syntax': [

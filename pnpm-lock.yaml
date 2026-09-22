@@ -220,6 +220,9 @@ importers:
       '@template/shared':
         specifier: workspace:*
         version: link:../shared
+      '@template/users-module':
+        specifier: workspace:*
+        version: link:../modules/user
       awilix:
         specifier: ^13.0.5
         version: 13.0.5
@@ -279,6 +282,9 @@ importers:
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
+      dotenv-expand:
+        specifier: ^1000.0.0
+        version: 1000.0.0
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -1554,6 +1560,10 @@ packages:
   dockerode@4.0.12:
     resolution: {integrity: sha512-/bCZd6KlGcjZO8Buqmi/vXuqEGVEZ0PNjx/biBNqJD3MhK9DmdiAuKxqfNhflgDESDIiBz3qF+0e55+CpnrUcw==}
     engines: {node: '>= 8.0'}
+
+  dotenv-expand@1000.0.0:
+    resolution: {integrity: sha512-3T4TtUjXm5iGKFEirqKjcDJ0EheFJbv9peb5xytC+HNu3l5Ygnu4dYE8yeqkppHMsh1If9C/A//EJu7IPtNu+A==}
+    engines: {node: '>=16'}
 
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
@@ -4094,6 +4104,8 @@ snapshots:
       uuid: 10.0.0
     transitivePeerDependencies:
       - supports-color
+
+  dotenv-expand@1000.0.0: {}
 
   dotenv@17.4.2: {}
 
