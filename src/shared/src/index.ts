@@ -7,6 +7,14 @@ export {
   type UserProfile,
 } from './generated/prisma/client.js';
 
+export type {
+  UserCreateInput,
+  UserUpdateInput,
+  RefreshTokenCreateInput,
+  UserProfileCreateInput,
+  UserProfileUpdateInput,
+} from './generated/prisma/models.js';
+
 export { omitProperty } from './lib/db/omit-prisma-property.js';
 
 // Constants
@@ -20,13 +28,16 @@ export { logger, type Logger, type LogLevel } from './lib/logger/index.js';
 
 // Response
 export {
-  ApiResponse,
+  Api,
   buildMeta,
   requestIdOf,
   type Envelope,
   type ApiErrorBody,
   type ResponseMeta,
 } from './lib/response/index.js';
+
+// Middlewares
+export { Validate } from './lib/middleware/index.js';
 
 export {
   // Module contract

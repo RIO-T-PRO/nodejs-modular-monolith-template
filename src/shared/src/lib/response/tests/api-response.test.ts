@@ -4,19 +4,13 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 /* ------------------------------- Mocks ---------------------------------- */
 
 // Path must resolve to the SAME module the source files import:
-//   source:  src/lib/response/api-response.ts  →  '../logger/logger.js'  →  src/lib/logger/logger.js
-//   test:    src/lib/response/tests/*.test.ts  →  '../../logger/logger.js'  →  src/lib/logger/logger.js
 vi.mock('../../logger/logger.js', () => ({
   logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
 }));
 
-/* ------------------------------- Imports -------------------------------- */
-
-import { ApiResponse } from '../api-response.js';
+import { Api } from '../index.js';
 import { logger } from '../../logger/logger.js';
 import { AppError } from '../../../errors/app-error.js';
-
-/* ------------------------------- Helpers -------------------------------- */
 
 type ResMock = {
   locals: Record<string, unknown>;
@@ -51,9 +45,9 @@ beforeEach(() => {
 
 /* ---------------------------- Success factories -------------------------- */
 
-describe('ApiResponse.ok', () => {
+describe('Api.ok', () => {
   it('defaults to 200 and wraps data in a success envelope', () => {
-    const res = ApiResponse.ok({ id: 1 });
+    const res = Api.ok({ id: 1 });
     expect(res.statusCode).toBe(200);
     expect(res.toJSON()).toMatchObject({
       success: true,
@@ -63,15 +57,15 @@ describe('ApiResponse.ok', () => {
   });
 
   it('honours a custom status and meta', () => {
-    const res = ApiResponse.ok({ id: 1 }, { status: 202, meta: { requestId: 'r1' } });
+    const res = Api.ok({ id: 1 }, { status: 202, meta: { requestId: 'r1' } });
     expect(res.statusCode).toBe(202);
     expect(res.toJSON().meta.requestId).toBe('r1');
   });
 });
 
-describe('ApiResponse.created', () => {
+describe('Api.created', () => {
   it('uses 201', () => {
-    const res = ApiResponse.created({ id: 9 }, { requestId: 'req-x' });
+    const res = Api.created({ id: 9 }, { requestId: 'req-x' });
     expect(res.statusCode).toBe(201);
     expect(res.toJSON()).toMatchObject({
       success: true,
@@ -81,9 +75,9 @@ describe('ApiResponse.created', () => {
   });
 });
 
-describe('ApiResponse.noContent', () => {
+describe('Api.noContent', () => {
   it('uses 204 and null data', () => {
-    const res = ApiResponse.noContent();
+    const res = Api.noContent();
     expect(res.statusCode).toBe(204);
     expect(res.toJSON()).toMatchObject({ success: true, data: null });
   });
@@ -91,9 +85,9 @@ describe('ApiResponse.noContent', () => {
 
 /* ---------------------------- Failure factories -------------------------- */
 
-describe('ApiResponse.fail', () => {
+describe('Api.fail', () => {
   it('defaults to 400 with the provided error body', () => {
-    const res = ApiResponse.fail({ code: 'BAD', message: 'nope' });
+    const res = Api.fail({ code: 'BAD', message: 'nope' });
     expect(res.statusCode).toBe(400);
     expect(res.toJSON()).toMatchObject({
       success: false,
@@ -102,7 +96,7 @@ describe('ApiResponse.fail', () => {
   });
 
   it('honours custom status and meta', () => {
-    const res = ApiResponse.fail(
+    const res = Api.fail(
       { code: 'TEAPOT', message: 'short and stout' },
       { status: 418, meta: { requestId: 'x' } },
     );
@@ -113,11 +107,10 @@ describe('ApiResponse.fail', () => {
 
 /* ------------------------------- fromError ------------------------------- */
 
-describe('ApiResponse.fromError', () => {
-  // Real AppError signature: (message, statusCode, code, options?)
+describe('Api.fromError', () => {
   it('maps a non-operational AppError to error-level logging', () => {
     const err = new AppError('boom', 500, 'BOOM', { isOperational: false });
-    const out = ApiResponse.fromError(err, makeRes() as never);
+    const out = Api.fromError(err, makeRes() as never);
 
     expect(out.statusCode).toBe(500);
     expect(out.toJSON()).toMatchObject({
@@ -130,7 +123,7 @@ describe('ApiResponse.fromError', () => {
 
   it('maps an operational AppError to warn-level logging', () => {
     const err = new AppError('not found', 404, 'NOT_FOUND', { isOperational: true });
-    const out = ApiResponse.fromError(err, makeRes() as never);
+    const out = Api.fromError(err, makeRes() as never);
     expect(out.statusCode).toBe(404);
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
@@ -138,7 +131,7 @@ describe('ApiResponse.fromError', () => {
 
   it('defaults to operational when options are omitted (warn-level)', () => {
     const err = new AppError('oops', 400, 'OOPS');
-    ApiResponse.fromError(err, makeRes() as never);
+    Api.fromError(err, makeRes() as never);
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -147,7 +140,7 @@ describe('ApiResponse.fromError', () => {
     const err = new AppError('validation', 422, 'VALIDATION_ERROR', {
       details: { email: ['required'] },
     });
-    const out = ApiResponse.fromError(err, makeRes() as never);
+    const out = Api.fromError(err, makeRes() as never);
     expect(out.toJSON()).toMatchObject({
       error: { details: { email: ['required'] } },
     });
@@ -155,21 +148,21 @@ describe('ApiResponse.fromError', () => {
 
   it('omits details when undefined', () => {
     const err = new AppError('x', 400, 'X');
-    const out = ApiResponse.fromError(err, makeRes() as never);
+    const out = Api.fromError(err, makeRes() as never);
     const body = out.toJSON() as unknown as { error: Record<string, unknown> };
     expect('details' in body.error).toBe(false);
   });
 
   it('uses the custom name when options.name is provided', () => {
     const err = new AppError('x', 400, 'X', { name: 'UserNotFoundError' });
-    const out = ApiResponse.fromError(err, makeRes() as never);
+    const out = Api.fromError(err, makeRes() as never);
     expect(out.toJSON()).toMatchObject({
       error: { name: 'UserNotFoundError' },
     });
   });
 
   it('returns an opaque 500 for unknown errors', () => {
-    const out = ApiResponse.fromError(new Error('secret sauce'), makeRes() as never);
+    const out = Api.fromError(new Error('secret sauce'), makeRes() as never);
     expect(out.statusCode).toBe(500);
     expect(out.toJSON()).toMatchObject({
       success: false,
@@ -180,7 +173,7 @@ describe('ApiResponse.fromError', () => {
 
   it('produces STREAM_ERROR when headers were already sent', () => {
     const res = makeRes({ headersSent: true });
-    const out = ApiResponse.fromError(new Error('late'), res as never);
+    const out = Api.fromError(new Error('late'), res as never);
     expect(out.statusCode).toBe(500);
     expect(out.toJSON()).toMatchObject({
       success: false,
@@ -194,29 +187,28 @@ describe('ApiResponse.fromError', () => {
 
   it('picks up requestId from res.locals', () => {
     const res = makeRes({ locals: { requestId: 'req-42' } });
-    const out = ApiResponse.fromError(new Error('x'), res as never);
+    const out = Api.fromError(new Error('x'), res as never);
     expect(out.toJSON().meta.requestId).toBe('req-42');
   });
 
   it('ignores a non-string requestId on res.locals', () => {
-    // Guards the requestIdOf runtime-check fix at the integration level.
     const res = makeRes({ locals: { requestId: 42 } });
-    const out = ApiResponse.fromError(new Error('x'), res as never);
+    const out = Api.fromError(new Error('x'), res as never);
     expect(out.toJSON().meta.requestId).toBeUndefined();
   });
 
   it('works without a Response (no requestId)', () => {
-    const out = ApiResponse.fromError(new Error('x'));
+    const out = Api.fromError(new Error('x'));
     expect(out.toJSON().meta.requestId).toBeUndefined();
   });
 });
 
 /* --------------------------------- send ---------------------------------- */
 
-describe('ApiResponse#send', () => {
+describe('InternalApiResponse#send', () => {
   it('writes status + JSON body', () => {
     const res = makeRes();
-    ApiResponse.ok({ hello: 'world' }).send(res as never);
+    Api.ok({ hello: 'world' }).send(res as never);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ success: true, data: { hello: 'world' } }),
@@ -225,7 +217,7 @@ describe('ApiResponse#send', () => {
 
   it('uses res.end() for 204 (no JSON body)', () => {
     const res = makeRes();
-    ApiResponse.noContent().send(res as never);
+    Api.noContent().send(res as never);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledTimes(1);
     expect(res.json).not.toHaveBeenCalled();
@@ -233,7 +225,7 @@ describe('ApiResponse#send', () => {
 
   it('does nothing when headers were already sent', () => {
     const res = makeRes({ headersSent: true });
-    ApiResponse.ok({ x: 1 }).send(res as never);
+    Api.ok({ x: 1 }).send(res as never);
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });
@@ -241,12 +233,12 @@ describe('ApiResponse#send', () => {
 
 /* -------------------------------- handler -------------------------------- */
 
-describe('ApiResponse.handler', () => {
+describe('Api.handler', () => {
   const next = vi.fn();
 
-  it('sends an ApiResponse returned by the handler as-is', async () => {
+  it('sends an Api response returned by the handler as-is', async () => {
     const res = makeRes();
-    const h = ApiResponse.handler(async () => ApiResponse.created({ id: 1 }));
+    const h = Api.handler(async () => Api.created({ id: 1 }));
     h(makeReq(), res as never, next);
     await flushAsync();
 
@@ -258,7 +250,7 @@ describe('ApiResponse.handler', () => {
 
   it('wraps a raw return value in a 200 envelope', async () => {
     const res = makeRes();
-    const h = ApiResponse.handler(async () => ({ answer: 42 }));
+    const h = Api.handler(async () => ({ answer: 42 }));
     h(makeReq(), res as never, next);
     await flushAsync();
 
@@ -268,7 +260,7 @@ describe('ApiResponse.handler', () => {
 
   it('converts thrown errors via fromError', async () => {
     const res = makeRes();
-    const h = ApiResponse.handler(async () => {
+    const h = Api.handler(async () => {
       throw new AppError('nope', 409, 'NOPE');
     });
     h(makeReq(), res as never, next);
@@ -286,7 +278,7 @@ describe('ApiResponse.handler', () => {
 
   it('errors out when the handler returns undefined without sending', async () => {
     const res = makeRes();
-    const h = ApiResponse.handler(async () => undefined);
+    const h = Api.handler(async () => undefined);
     h(makeReq(), res as never, next);
     await flushAsync();
 
@@ -299,7 +291,7 @@ describe('ApiResponse.handler', () => {
 
   it('does nothing when handler already sent headers', async () => {
     const res = makeRes({ headersSent: true });
-    const h = ApiResponse.handler(async () => ({ ignored: true }));
+    const h = Api.handler(async () => ({ ignored: true }));
     h(makeReq(), res as never, next);
     await flushAsync();
 
@@ -310,7 +302,7 @@ describe('ApiResponse.handler', () => {
   it('delegates to next() when throwing after headers sent', async () => {
     const res = makeRes({ headersSent: true });
     const boom = new Error('post-headers');
-    const h = ApiResponse.handler(async () => {
+    const h = Api.handler(async () => {
       throw boom;
     });
     h(makeReq(), res as never, next);
@@ -323,12 +315,12 @@ describe('ApiResponse.handler', () => {
 
 /* --------------------------- errorMiddleware ----------------------------- */
 
-describe('ApiResponse.errorMiddleware', () => {
+describe('Api.errorMiddleware', () => {
   const next = vi.fn();
 
   it('sends the error envelope when headers are not yet sent', () => {
     const res = makeRes();
-    const mw = ApiResponse.errorMiddleware();
+    const mw = Api.errorMiddleware();
     mw(new AppError('bad', 400, 'BAD'), makeReq(), res as never, next);
 
     expect(res.status).toHaveBeenCalledWith(400);
@@ -344,7 +336,7 @@ describe('ApiResponse.errorMiddleware', () => {
   it('calls next(err) when headers already sent', () => {
     const res = makeRes({ headersSent: true });
     const err = new Error('late');
-    const mw = ApiResponse.errorMiddleware();
+    const mw = Api.errorMiddleware();
     mw(err, makeReq(), res as never, next);
 
     expect(next).toHaveBeenCalledWith(err);
