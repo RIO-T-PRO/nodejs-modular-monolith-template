@@ -3,10 +3,10 @@ import type { RefreshTokenRepositoryPort } from '../domain/refresh-token-reposit
 import type { RefreshToken, SaveRefreshTokenInput } from '../domain/refresh-token-types.js';
 import { env } from '@template/shared';
 
-export class PrismaUserRepository implements RefreshTokenRepositoryPort {
+// Fixed the class name to reflect what it actually does
+export class PrismaRefreshTokenRepository implements RefreshTokenRepositoryPort {
   constructor(private readonly deps: { prisma: PrismaClient }) {}
 
-  // The Mapper: Converts the DB shape to the pure Domain shape
   private toDomain(prismaRefreshToken: PrismaRefreshToken): RefreshToken {
     return {
       id: prismaRefreshToken.id,
@@ -30,13 +30,15 @@ export class PrismaUserRepository implements RefreshTokenRepositoryPort {
   }
 
   async revoke(token: string): Promise<RefreshToken | null> {
-    const prismaToken = await this.deps.prisma.refreshToken.delete({
-      where: { token },
-    });
+    try {
+      const prismaToken = await this.deps.prisma.refreshToken.delete({
+        where: { token },
+      });
 
-    if (!prismaToken) return null;
-
-    return this.toDomain(prismaToken);
+      return this.toDomain(prismaToken);
+    } catch {
+      return null;
+    }
   }
 
   async findById(id: string): Promise<RefreshToken | null> {
@@ -45,7 +47,6 @@ export class PrismaUserRepository implements RefreshTokenRepositoryPort {
     });
 
     if (!prismaToken) return null;
-
     return this.toDomain(prismaToken);
   }
 
@@ -55,7 +56,6 @@ export class PrismaUserRepository implements RefreshTokenRepositoryPort {
     });
 
     if (!prismaToken) return null;
-
     return this.toDomain(prismaToken);
   }
 }
