@@ -11,6 +11,7 @@ export type {
   UserCreateInput,
   UserUpdateInput,
   RefreshTokenCreateInput,
+  RefreshTokenUpdateInput,
   UserProfileCreateInput,
   UserProfileUpdateInput,
 } from './generated/prisma/models.js';
