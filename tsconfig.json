@@ -9,6 +9,7 @@
   "include": [
     // eslint must be included so that import.meta.dirname work
     "eslint.config.ts",
-    "vite.config.ts" // Any other root tooling files
+    "vite.config.ts", // Any other root tooling files
+    "scripts/load-env.ts"
   ]
 }
