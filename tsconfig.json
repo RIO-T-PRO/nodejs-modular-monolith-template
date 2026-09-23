@@ -4,7 +4,8 @@
   "references": [
     { "path": "./src/shared/tsconfig.build.json" },
     { "path": "./src/app/tsconfig.build.json" },
-    { "path": "./src/modules/user/tsconfig.build.json" }
+    { "path": "./src/modules/user/tsconfig.build.json" },
+    { "path": "./src/modules/refresh-token/tsconfig.build.json" }
   ],
   "include": [
     // eslint must be included so that import.meta.dirname work
