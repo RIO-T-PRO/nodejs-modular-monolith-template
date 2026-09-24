@@ -6,7 +6,7 @@
 export interface User {
   readonly user_id: string;
   readonly email: string;
-  readonly fullName: string;
+  readonly fullname: string;
   readonly status: boolean;
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -32,5 +32,5 @@ export interface AuthCredential {
 export interface UserContactDto {
   user_id: string;
   email: string;
-  fullName: string;
+  fullname: string;
 }

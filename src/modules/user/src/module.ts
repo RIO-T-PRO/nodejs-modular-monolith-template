@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { asClass } from 'awilix';
+import { asClass, asValue } from 'awilix';
 import type { AwilixContainer } from 'awilix';
 import {
   DomainEventDispatcher,
@@ -10,89 +10,78 @@ import {
 import { PrismaUserRepository } from './infrastructure/prisma-user.repository.js';
 import { UserIntegrationEventPublisher } from './infrastructure/integration-event-publisher.js';
 import { SignUpUseCase } from './application/create-user-use-case.js';
+import { GetUserContactUseCase } from './application/get-user-contact-use-case.js';
 import { UserController } from './api/user-controller.js';
 import { createUserRoutes } from './api/user-routes.js';
+import type { TokenIssuerPort } from './domain/token-issue-port.js';
+import type { UserContactDto } from './domain/user-types.js';
 
 const basePath = '/users';
 
-// Everything this module registers into its OWN Awilix scope. Kept
-// private to this file — nothing outside module.ts/index.ts should
-// need to know these keys exist.
-//
-// NOTE: keys must match exactly what register() puts on the scope.
-// The controller injects by key name in PROXY mode, so a mismatch
-// here is a silent `undefined` at construction time.
 interface UsersModuleCradle {
   domainEventDispatcher: DomainEventDispatcher;
   userRepository: PrismaUserRepository;
   createUserUseCase: SignUpUseCase;
+  getUserContactUseCase: GetUserContactUseCase;
+  tokenIssuer: TokenIssuerPort;
   userController: UserController;
 }
 
-// Set once, when register() runs. Cleared again in dispose() so that
-// a second registration (e.g. across integration tests) doesn't leave
-// the facade pointing at a dead scope.
-let moduleCradle: UsersModuleCradle | undefined;
+export interface UsersModuleDeps {
+  tokenIssuer: TokenIssuerPort;
+}
 
-export const getUsersModuleCradle = (): UsersModuleCradle => {
-  if (!moduleCradle) {
-    throw new Error('users module has not been registered yet — check the module load order.');
-  }
-  return moduleCradle;
-};
+export interface UsersFacade {
+  findById(userId: string): Promise<UserContactDto | null>;
+}
 
-// THE ONLY FILE in this module allowed to import from every layer.
-// Its single responsibility is wiring domain ports to infrastructure
-// implementations and infrastructure controllers to application use
-// cases — nothing here contains business logic itself.
-export const usersModule: AppModule = {
-  name: 'users',
-  basePath,
+export const createUsersModule = (
+  deps: UsersModuleDeps,
+): { module: AppModule; facade: UsersFacade } => {
+  // Private to this factory: no exported global getter.
+  let cradle: UsersModuleCradle | undefined;
 
-  async register(root: AwilixContainer<SharedCradle>): Promise<LoadedModule> {
-    // A SCOPE, not a new container: this module still sees the root's
-    // env/logger/prisma/messageBroker, but its OWN registrations can't
-    // collide with another module's.
-    const scope = root.createScope<SharedCradle & UsersModuleCradle>();
+  const facade: UsersFacade = {
+    findById: (id) => {
+      if (!cradle) throw new Error('users module has not been registered yet.');
+      return cradle.getUserContactUseCase.execute(id);
+    },
+  };
 
-    scope.register({
-      domainEventDispatcher: asClass(DomainEventDispatcher).singleton(),
-      userRepository: asClass(PrismaUserRepository).singleton(),
-      createUserUseCase: asClass(SignUpUseCase).singleton(),
-      userController: asClass(UserController).singleton(),
-    });
+  const module: AppModule = {
+    name: 'users',
+    basePath,
 
-    moduleCradle = scope.cradle;
+    async register(root: AwilixContainer<SharedCradle>): Promise<LoadedModule> {
+      const scope = root.createScope<SharedCradle & UsersModuleCradle>();
 
-    // Wire the domain-event -> integration-event bridge. This is the
-    // one place in the whole module that knows both worlds exist.
-    // `wire()` is expected to return an unsubscribe function so that
-    // dispose() can tear the subscription down again.
-    const publisher = new UserIntegrationEventPublisher({
-      messageBroker: scope.cradle.messageBroker,
-    });
+      scope.register({
+        domainEventDispatcher: asClass(DomainEventDispatcher).singleton(),
+        userRepository: asClass(PrismaUserRepository).singleton(),
+        createUserUseCase: asClass(SignUpUseCase).singleton(),
+        getUserContactUseCase: asClass(GetUserContactUseCase).singleton(),
+        tokenIssuer: asValue(deps.tokenIssuer), // injected by the app
+        userController: asClass(UserController).singleton(),
+      });
 
-    const unwire = publisher.wire(scope.cradle.domainEventDispatcher);
+      const c = scope.cradle;
+      cradle = c;
 
-    // Build the router here and hand it back to the shell — the shell
-    // owns mounting, so we don't touch `app` at all.
-    const router = createUserRoutes(scope.cradle.userController);
+      const publisher = new UserIntegrationEventPublisher({ messageBroker: c.messageBroker });
+      const unwire = publisher.wire(c.domainEventDispatcher);
 
-    return {
-      name: 'users',
-      basePath,
-      router,
-      async dispose() {
-        // 1. Stop forwarding domain events to the broker.
-        unwire();
-        // 2. Tear down this module's scope (runs any disposers
-        //    registered via `.disposable()` on our own classes).
-        await scope.dispose();
-        // 3. Drop the facade reference if it's still ours.
-        if (moduleCradle === scope.cradle) {
-          moduleCradle = undefined;
-        }
-      },
-    };
-  },
+      return {
+        name: 'users',
+        basePath,
+        router: createUserRoutes(c.userController),
+        async dispose() {
+          unwire();
+          await scope.dispose();
+          if (cradle === c) cradle = undefined;
+        },
+      };
+    },
+  };
+
+  return { module, facade };
 };

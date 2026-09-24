@@ -1,12 +1,10 @@
 import express, { type Express, type Request, type Response } from 'express';
 import cookieParser from 'cookie-parser';
 import type { AwilixContainer } from 'awilix';
-import type { AppModule, SharedCradle, LoadedModule, RootResources } from '@template/shared';
+import type { SharedCradle, LoadedModule, RootResources } from '@template/shared';
 import { Api, createRootContainer } from '@template/shared';
-import { usersModule } from '@template/users-module';
+import { buildModules } from './composition-root.js';
 import { loadModules } from './load-modules.js';
-
-const modules: AppModule[] = [usersModule];
 
 export interface CreatedApp {
   app: Express;
@@ -24,7 +22,7 @@ const createApp = async (): Promise<CreatedApp> => {
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-  const loadedModules = await loadModules(app, container, modules);
+  const loadedModules = await loadModules(app, container, buildModules());
 
   app.use((req: Request, res: Response) => {
     Api.fail(

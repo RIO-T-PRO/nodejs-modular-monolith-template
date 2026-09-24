@@ -10,7 +10,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
     return {
       user_id: prismaUser.user_id,
       email: prismaUser.email,
-      fullName: prismaUser.fullname,
+      fullname: prismaUser.fullname,
       status: prismaUser.status,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
