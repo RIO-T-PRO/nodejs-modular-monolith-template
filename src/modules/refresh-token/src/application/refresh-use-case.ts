@@ -1,8 +1,8 @@
 // import { AppError } from '@template/shared';
 // import type { JwtPort } from '../domain/jwt-port.js';
 // import type { RefreshTokenRepositoryPort } from '../domain/refresh-token-repository-port.js';
-// import type { UserRepositoryPort } from '../domain/user-repository-port.js';
 // import type { CookiePort } from '../domain/cookie-port.js';
+// import type { UsersFacade } from '../../users/index.js';
 // import type { Response } from 'express';
 
 // export interface RefreshTokenInput {
@@ -19,8 +19,8 @@
 //     private readonly deps: {
 //       jwtService: JwtPort;
 //       refreshTokenRepository: RefreshTokenRepositoryPort;
-//       userRepository: UserRepositoryPort;
 //       cookieAdapter: CookiePort;
+//       usersFacade: UsersFacade; // Interacting strictly via the Facade boundary
 //     },
 //   ) {}
 
@@ -43,24 +43,26 @@
 //       throw AppError.unauthorized('Refresh token expired');
 //     }
 
-//     // Fetch the user to populate the Access Token claims
-//     const user = await this.deps.userRepository.findById(payload.userId);
+//     // Safely retrieve user data from the Users module using the Facade
+//     const user = await this.deps.usersFacade.getUserForToken(payload.userId);
 //     if (!user) {
 //       throw AppError.unauthorized('User no longer exists');
 //     }
 
+//     // Construct the rich Access Token payload
 //     const newAccessToken = this.deps.jwtService.signAccess({
-//       userId: user.user_id,
+//       userId: user.userId,
 //       email: user.email,
 //       fullname: user.fullname,
 //     });
 
+//     // Construct the strict Refresh Token payload
 //     const newRefreshToken = this.deps.jwtService.signRefresh({
-//       userId: user.user_id,
+//       userId: user.userId,
 //     });
 
 //     await this.deps.refreshTokenRepository.save({
-//       userId: user.user_id,
+//       userId: user.userId,
 //       token: newRefreshToken,
 //     });
 
