@@ -4,7 +4,7 @@ import type { RefreshTokenRepositoryPort } from '../domain/refresh-token-reposit
 export interface GenerateTokensInput {
   userId: string;
   email: string;
-  fullname: string;
+  fullName: string;
 }
 
 export interface GenerateTokensOutput {
@@ -24,7 +24,7 @@ export class GenerateTokensUseCase {
     const accessToken = this.deps.jwtService.signAccess({
       userId: input.userId,
       email: input.email,
-      fullname: input.fullname,
+      fullName: input.fullName,
     });
 
     const refreshToken = this.deps.jwtService.signRefresh({

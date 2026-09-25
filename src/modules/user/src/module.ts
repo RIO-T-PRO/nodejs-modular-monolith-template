@@ -2,26 +2,34 @@
 import { asClass, asValue } from 'awilix';
 import type { AwilixContainer } from 'awilix';
 import {
+  AppError,
   DomainEventDispatcher,
   type AppModule,
   type LoadedModule,
   type SharedCradle,
 } from '@template/shared';
 import { PrismaUserRepository } from './infrastructure/prisma-user.repository.js';
+import { Pbkdf2PasswordHasher } from './infrastructure/pbkdf2-password-hasher.js';
 import { UserIntegrationEventPublisher } from './infrastructure/integration-event-publisher.js';
-import { SignUpUseCase } from './application/create-user-use-case.js';
+
+import { UserSignUpUseCase } from './application/create-user-use-case.js';
 import { GetUserContactUseCase } from './application/get-user-contact-use-case.js';
+
 import { UserController } from './api/user-controller.js';
 import { createUserRoutes } from './api/user-routes.js';
+
 import type { TokenIssuerPort } from './domain/token-issue-port.js';
+import type { UserRepositoryPort } from './domain/user-repository-port.js';
+import type { PasswordHasherPort } from './domain/password-hasher-port.js';
 import type { UserContactDto } from './domain/user-types.js';
 
 const basePath = '/users';
 
 interface UsersModuleCradle {
   domainEventDispatcher: DomainEventDispatcher;
-  userRepository: PrismaUserRepository;
-  createUserUseCase: SignUpUseCase;
+  userRepository: UserRepositoryPort;
+  passwordHasher: PasswordHasherPort;
+  createUserUseCase: UserSignUpUseCase;
   getUserContactUseCase: GetUserContactUseCase;
   tokenIssuer: TokenIssuerPort;
   userController: UserController;
@@ -43,7 +51,7 @@ export const createUsersModule = (
 
   const facade: UsersFacade = {
     findById: (id) => {
-      if (!cradle) throw new Error('users module has not been registered yet.');
+      if (!cradle) throw AppError.badRequest('users module has not been registered yet.');
       return cradle.getUserContactUseCase.execute(id);
     },
   };
@@ -58,7 +66,8 @@ export const createUsersModule = (
       scope.register({
         domainEventDispatcher: asClass(DomainEventDispatcher).singleton(),
         userRepository: asClass(PrismaUserRepository).singleton(),
-        createUserUseCase: asClass(SignUpUseCase).singleton(),
+        passwordHasher: asClass(Pbkdf2PasswordHasher).singleton(),
+        createUserUseCase: asClass(UserSignUpUseCase).singleton(),
         getUserContactUseCase: asClass(GetUserContactUseCase).singleton(),
         tokenIssuer: asValue(deps.tokenIssuer), // injected by the app
         userController: asClass(UserController).singleton(),

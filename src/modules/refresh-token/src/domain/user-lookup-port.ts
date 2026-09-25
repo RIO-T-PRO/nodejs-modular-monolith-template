@@ -1,7 +1,7 @@
 export interface UserContact {
-  user_id: string;
+  id: string;
   email: string;
-  fullname: string;
+  fullName: string;
 }
 
 export interface UserLookupPort {

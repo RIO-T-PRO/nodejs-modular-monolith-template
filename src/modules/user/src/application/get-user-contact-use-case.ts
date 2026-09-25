@@ -6,6 +6,6 @@ export class GetUserContactUseCase {
 
   async execute(userId: string): Promise<UserContactDto | null> {
     const user = await this.deps.userRepository.findById(userId);
-    return user ? { user_id: user.user_id, email: user.email, fullname: user.fullname } : null;
+    return user ? { id: user.id, email: user.email, fullName: user.fullName } : null;
   }
 }

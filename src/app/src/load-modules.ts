@@ -1,8 +1,7 @@
 import type { Express } from 'express';
 import type { AwilixContainer } from 'awilix';
-import type { SharedCradle } from '@template/shared';
-import { logger } from '@template/shared';
-import type { AppModule, LoadedModule } from '@template/shared';
+import { AppError, logger } from '@template/shared';
+import type { AppModule, LoadedModule, SharedCradle } from '@template/shared';
 
 const orderByDependencies = (modules: AppModule[]): AppModule[] => {
   const byName = new Map(modules.map((m) => [m.name, m]));
@@ -13,13 +12,19 @@ const orderByDependencies = (modules: AppModule[]): AppModule[] => {
   const visit = (mod: AppModule) => {
     if (visited.has(mod.name)) return;
     if (visiting.has(mod.name)) {
-      throw new Error(`Circular module dependency detected at "${mod.name}"`);
+      throw AppError.internal(
+        `Circular module dependency detected at "${mod.name}"`,
+        'CIRCULAR_MODULE_DEPENDENCY',
+      );
     }
     visiting.add(mod.name);
     for (const depName of mod.dependsOn ?? []) {
       const dep = byName.get(depName);
       if (!dep) {
-        throw new Error(`Module "${mod.name}" depends on unknown module "${depName}"`);
+        throw AppError.internal(
+          `Module "${mod.name}" depends on unknown module "${depName}"`,
+          'UNKNOWN_MODULE_DEPENDENCY',
+        );
       }
       visit(dep);
     }

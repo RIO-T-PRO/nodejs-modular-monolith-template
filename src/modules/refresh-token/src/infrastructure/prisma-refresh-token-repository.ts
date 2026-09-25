@@ -11,7 +11,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepositoryPort 
     return {
       id: prismaRefreshToken.id,
       token: prismaRefreshToken.token,
-      userId: prismaRefreshToken.user_id,
+      userId: prismaRefreshToken.userId,
       createdAt: prismaRefreshToken.createdAt,
       expiresAt: prismaRefreshToken.expiresAt,
     };
@@ -20,7 +20,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepositoryPort 
   async save(input: SaveRefreshTokenInput): Promise<RefreshToken> {
     const prismaToken = await this.deps.prisma.refreshToken.create({
       data: {
-        user_id: input.userId,
+        userId: input.userId,
         token: input.token,
         expiresAt: new Date(Date.now() + env.JWT_REFRESH__SECRET_KEY_EXPIRES_IN * 1000),
       },
@@ -52,7 +52,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepositoryPort 
 
   async findByUserId(userId: string): Promise<RefreshToken | null> {
     const prismaToken = await this.deps.prisma.refreshToken.findFirst({
-      where: { user_id: userId },
+      where: { userId: userId },
     });
 
     if (!prismaToken) return null;

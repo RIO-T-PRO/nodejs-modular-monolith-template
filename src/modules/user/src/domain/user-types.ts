@@ -1,36 +1,29 @@
 // Pure domain shapes. No Prisma, no Express, no Awilix — this file
 // could be copy-pasted into a codebase with none of those and still compile.
 
-// ─── Identity ────────────────────────────────────────────────────────────
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
 export interface User {
-  readonly user_id: string;
+  readonly id: string;
   readonly email: string;
-  readonly fullname: string;
-  readonly status: boolean;
+  readonly fullName: string;
+  readonly password: string;
+  readonly salt: string;
+  readonly status: UserStatus; // Updated from boolean to UserStatus
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
 
 export interface CreateUserInput {
   email: string;
-  fullname: string;
+  fullName: string;
   passwordHash: string;
   salt: string;
+  status?: UserStatus; // Optional: defaults to ACTIVE in Prisma if omitted
 }
-
-// ─── Auth (owned by the Identity module, NOT exposed via facade) ─────────
-
-export interface AuthCredential {
-  readonly user_id: string;
-  readonly passwordHash: string;
-  readonly salt: string;
-}
-
-// ─── Cross-module DTO (exposed via the facade in index.ts) ───────────────
 
 export interface UserContactDto {
-  user_id: string;
+  id: string;
   email: string;
-  fullname: string;
+  fullName: string;
 }

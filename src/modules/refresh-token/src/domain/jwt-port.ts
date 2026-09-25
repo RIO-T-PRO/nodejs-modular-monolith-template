@@ -3,7 +3,7 @@ import type { Request } from 'express';
 export interface AccessPayload {
   userId: string;
   email: string;
-  fullname: string;
+  fullName: string;
   [key: string]: unknown;
 }
 

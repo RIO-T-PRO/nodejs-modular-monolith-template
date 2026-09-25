@@ -5,6 +5,7 @@ export {
   type User,
   type RefreshToken,
   type UserProfile,
+  type UserStatus,
 } from './generated/prisma/client.js';
 
 export type {

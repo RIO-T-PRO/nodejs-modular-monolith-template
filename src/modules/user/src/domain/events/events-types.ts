@@ -1,5 +1,5 @@
 export interface UserCreatedPayload {
-  user_id: string;
+  id: string;
   email: string;
   fullname: string;
 }

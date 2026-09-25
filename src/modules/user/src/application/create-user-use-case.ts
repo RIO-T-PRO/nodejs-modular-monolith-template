@@ -7,11 +7,11 @@ import { UserCreatedEvent } from '../domain/events/user-created-event.js';
 
 export interface SignUpInput {
   email: string;
-  fullname: string;
+  fullName: string;
   passwordRaw: string;
 }
 
-export class SignUpUseCase {
+export class UserSignUpUseCase {
   constructor(
     private readonly deps: {
       userRepository: UserRepositoryPort;
@@ -31,13 +31,13 @@ export class SignUpUseCase {
 
     const user = await this.deps.userRepository.create({
       email: input.email,
-      fullname: input.fullname,
+      fullName: input.fullName,
       passwordHash: hash,
       salt: salt,
     });
 
     await this.deps.domainEventDispatcher.dispatch(
-      UserCreatedEvent({ user_id: user.user_id, email: user.email, fullname: user.fullName }),
+      UserCreatedEvent({ id: user.id, email: user.email, fullname: user.fullName }),
     );
 
     return user;

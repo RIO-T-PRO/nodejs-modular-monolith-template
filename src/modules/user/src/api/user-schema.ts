@@ -3,7 +3,7 @@ import { z } from 'zod';
 // SignUp schemas
 export const SignUpSchema = z.object({
   email: z.email({ error: 'Invalid email address format' }),
-  fullname: z.string().min(2, { error: 'Full name must be at least 2 characters long' }),
+  fullName: z.string().min(2, { error: 'Full name must be at least 2 characters long' }),
   password: z.string().min(8, { error: 'Password must be at least 8 characters long' }),
 });
 

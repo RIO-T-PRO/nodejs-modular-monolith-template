@@ -22,8 +22,8 @@
     "test:integration": "vitest run --project integration",
     "test:e2e": "vitest run --project e2e",
     "test:cov": "vitest run --coverage --project \"unit:*\"",
-    "prisma:generate": "pnpm -r --if-present run prisma:generate",
-    "prisma:migrate": "pnpm -r --if-present run prisma:migrate"
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -33,6 +33,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/supertest": "^6.0.3",
     "@vitest/coverage-v8": "^5.0.0",
+    "prisma": "^7.10.0",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
     "jiti": "^2.7.0",

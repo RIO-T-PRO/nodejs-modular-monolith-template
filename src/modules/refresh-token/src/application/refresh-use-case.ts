@@ -49,13 +49,13 @@ export class RefreshTokenUseCase {
     }
 
     const accessToken = this.deps.jwtService.signAccess({
-      userId: user.user_id,
+      userId: user.id,
       email: user.email,
-      fullname: user.fullName,
+      fullName: user.fullName,
     });
-    const refreshToken = this.deps.jwtService.signRefresh({ userId: user.user_id });
+    const refreshToken = this.deps.jwtService.signRefresh({ userId: user.id });
 
-    await this.deps.refreshTokenRepository.save({ userId: user.user_id, token: refreshToken });
+    await this.deps.refreshTokenRepository.save({ userId: user.id, token: refreshToken });
 
     this.deps.cookieAdapter.setAccessCookie(input.res, accessToken);
     this.deps.cookieAdapter.setRefreshCookie(input.res, refreshToken);

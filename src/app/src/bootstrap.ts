@@ -1,8 +1,8 @@
-import express, { type Express, type Request, type Response } from 'express';
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 import type { AwilixContainer } from 'awilix';
 import type { SharedCradle, LoadedModule, RootResources } from '@template/shared';
-import { Api, createRootContainer } from '@template/shared';
+import { Api, AppError, createRootContainer } from '@template/shared';
 import { buildModules } from './composition-root.js';
 import { loadModules } from './load-modules.js';
 
@@ -24,11 +24,8 @@ const createApp = async (): Promise<CreatedApp> => {
 
   const loadedModules = await loadModules(app, container, buildModules());
 
-  app.use((req: Request, res: Response) => {
-    Api.fail(
-      { code: 'NOT_FOUND', message: `Route not found: ${req.method} ${req.originalUrl}` },
-      { status: 404 },
-    ).send(res);
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    next(AppError.notFound(`Route not found: ${req.method} ${req.originalUrl}`));
   });
 
   app.use(Api.errorMiddleware());

@@ -8,9 +8,11 @@ export class PrismaUserRepository implements UserRepositoryPort {
   // The Mapper: Converts the DB shape to the pure Domain shape
   private toDomain(prismaUser: PrismaUser): User {
     return {
-      user_id: prismaUser.user_id,
+      id: prismaUser.id,
       email: prismaUser.email,
-      fullname: prismaUser.fullname,
+      fullName: prismaUser.fullName,
+      password: prismaUser.password,
+      salt: prismaUser.salt,
       status: prismaUser.status,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
@@ -21,9 +23,10 @@ export class PrismaUserRepository implements UserRepositoryPort {
     const prismaUser = await this.deps.prisma.user.create({
       data: {
         email: input.email,
-        fullname: input.fullname,
+        fullName: input.fullName,
         password: input.passwordHash,
         salt: input.salt,
+        ...(input.status && { status: input.status }),
       },
     });
 
@@ -32,7 +35,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
 
   async findById(id: string): Promise<User | null> {
     const user = await this.deps.prisma.user.findUnique({
-      where: { user_id: id },
+      where: { id },
     });
 
     if (!user) return null;
@@ -42,7 +45,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
 
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.deps.prisma.user.findUnique({
-      where: { email: email },
+      where: { email },
     });
 
     if (!user) return null;

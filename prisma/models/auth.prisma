@@ -1,36 +1,42 @@
-
-model UserProfile {
-  user_profile_id String @id @default(uuid())
-  user_id         String
-  User            User   @relation(fields: [user_id], references: [user_id])
-  createdAt       DateTime @default(now())
-
-  @@map("user_profiles")
-}
-
 model User {
-  user_id       String         @id @default(uuid())
+  id            String         @id @default(uuid())
   email         String         @unique
-  fullname      String
+  fullName      String         @map("full_name")
   password      String
   salt          String
-  status        Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  UserProfile   UserProfile[]
-  RefreshTokens RefreshToken[]
+  status        UserStatus     @default(ACTIVE)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  userProfile   UserProfile?
+  refreshTokens RefreshToken[]
 
   @@map("users")
 }
 
+model UserProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("user_profiles")
+}
 
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
-  user_id   String
-  User      User   @relation(fields: [user_id], references: [user_id])
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([userId])
   @@map("refresh_tokens")
 }
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}   

@@ -51,8 +51,8 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  UserProfile: 'UserProfile',
   User: 'User',
+  UserProfile: 'UserProfile',
   RefreshToken: 'RefreshToken'
 } as const
 
@@ -72,19 +72,10 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const UserProfileScalarFieldEnum = {
-  user_profile_id: 'user_profile_id',
-  user_id: 'user_id',
-  createdAt: 'createdAt'
-} as const
-
-export type UserProfileScalarFieldEnum = (typeof UserProfileScalarFieldEnum)[keyof typeof UserProfileScalarFieldEnum]
-
-
 export const UserScalarFieldEnum = {
-  user_id: 'user_id',
+  id: 'id',
   email: 'email',
-  fullname: 'fullname',
+  fullName: 'fullName',
   password: 'password',
   salt: 'salt',
   status: 'status',
@@ -95,10 +86,19 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const UserProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type UserProfileScalarFieldEnum = (typeof UserProfileScalarFieldEnum)[keyof typeof UserProfileScalarFieldEnum]
+
+
 export const RefreshTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
-  user_id: 'user_id',
+  userId: 'userId',
   expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 } as const

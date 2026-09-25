@@ -8,7 +8,7 @@ export interface TokenIssuerPort {
   generateAndSaveTokens(input: {
     userId: string;
     email: string;
-    fullname: string;
+    fullName: string;
   }): Promise<AuthTokens>;
   attachCookies(res: Response, tokens: AuthTokens): void;
 }

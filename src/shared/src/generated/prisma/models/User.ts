@@ -25,31 +25,31 @@ export type AggregateUser = {
 }
 
 export type UserMinAggregateOutputType = {
-  user_id: string | null
+  id: string | null
   email: string | null
-  fullname: string | null
+  fullName: string | null
   password: string | null
   salt: string | null
-  status: boolean | null
+  status: $Enums.UserStatus | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
-  user_id: string | null
+  id: string | null
   email: string | null
-  fullname: string | null
+  fullName: string | null
   password: string | null
   salt: string | null
-  status: boolean | null
+  status: $Enums.UserStatus | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
-  user_id: number
+  id: number
   email: number
-  fullname: number
+  fullName: number
   password: number
   salt: number
   status: number
@@ -60,9 +60,9 @@ export type UserCountAggregateOutputType = {
 
 
 export type UserMinAggregateInputType = {
-  user_id?: true
+  id?: true
   email?: true
-  fullname?: true
+  fullName?: true
   password?: true
   salt?: true
   status?: true
@@ -71,9 +71,9 @@ export type UserMinAggregateInputType = {
 }
 
 export type UserMaxAggregateInputType = {
-  user_id?: true
+  id?: true
   email?: true
-  fullname?: true
+  fullName?: true
   password?: true
   salt?: true
   status?: true
@@ -82,9 +82,9 @@ export type UserMaxAggregateInputType = {
 }
 
 export type UserCountAggregateInputType = {
-  user_id?: true
+  id?: true
   email?: true
-  fullname?: true
+  fullName?: true
   password?: true
   salt?: true
   status?: true
@@ -166,12 +166,12 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 }
 
 export type UserGroupByOutputType = {
-  user_id: string
+  id: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status: boolean
+  status: $Enums.UserStatus
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -198,51 +198,51 @@ export type UserWhereInput = {
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
-  user_id?: Prisma.StringFilter<"User"> | string
+  id?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
-  fullname?: Prisma.StringFilter<"User"> | string
+  fullName?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   salt?: Prisma.StringFilter<"User"> | string
-  status?: Prisma.BoolFilter<"User"> | boolean
+  status?: Prisma.EnumUserStatusFilter<"User"> | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  UserProfile?: Prisma.UserProfileListRelationFilter
-  RefreshTokens?: Prisma.RefreshTokenListRelationFilter
+  userProfile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
+  refreshTokens?: Prisma.RefreshTokenListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
-  user_id?: Prisma.SortOrder
+  id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  fullname?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   password?: Prisma.SortOrder
   salt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  UserProfile?: Prisma.UserProfileOrderByRelationAggregateInput
-  RefreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
+  userProfile?: Prisma.UserProfileOrderByWithRelationInput
+  refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
-  user_id?: string
+  id?: string
   email?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
-  fullname?: Prisma.StringFilter<"User"> | string
+  fullName?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   salt?: Prisma.StringFilter<"User"> | string
-  status?: Prisma.BoolFilter<"User"> | boolean
+  status?: Prisma.EnumUserStatusFilter<"User"> | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  UserProfile?: Prisma.UserProfileListRelationFilter
-  RefreshTokens?: Prisma.RefreshTokenListRelationFilter
-}, "user_id" | "email">
+  userProfile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
+  refreshTokens?: Prisma.RefreshTokenListRelationFilter
+}, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
-  user_id?: Prisma.SortOrder
+  id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  fullname?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   password?: Prisma.SortOrder
   salt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -257,110 +257,105 @@ export type UserScalarWhereWithAggregatesInput = {
   AND?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   OR?: Prisma.UserScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
-  user_id?: Prisma.StringWithAggregatesFilter<"User"> | string
+  id?: Prisma.StringWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
-  fullname?: Prisma.StringWithAggregatesFilter<"User"> | string
+  fullName?: Prisma.StringWithAggregatesFilter<"User"> | string
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   salt?: Prisma.StringWithAggregatesFilter<"User"> | string
-  status?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  status?: Prisma.EnumUserStatusWithAggregatesFilter<"User"> | $Enums.UserStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
 export type UserCreateInput = {
-  user_id?: string
+  id?: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status?: boolean
+  status?: $Enums.UserStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  UserProfile?: Prisma.UserProfileCreateNestedManyWithoutUserInput
-  RefreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  userProfile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
-  user_id?: string
+  id?: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status?: boolean
+  status?: $Enums.UserStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  UserProfile?: Prisma.UserProfileUncheckedCreateNestedManyWithoutUserInput
-  RefreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  userProfile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  UserProfile?: Prisma.UserProfileUpdateManyWithoutUserNestedInput
-  RefreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  userProfile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  UserProfile?: Prisma.UserProfileUncheckedUpdateManyWithoutUserNestedInput
-  RefreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  userProfile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
-  user_id?: string
+  id?: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status?: boolean
+  status?: $Enums.UserStatus
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserUpdateManyMutationInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateManyInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
-}
-
 export type UserCountOrderByAggregateInput = {
-  user_id?: Prisma.SortOrder
+  id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  fullname?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   password?: Prisma.SortOrder
   salt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -369,9 +364,9 @@ export type UserCountOrderByAggregateInput = {
 }
 
 export type UserMaxOrderByAggregateInput = {
-  user_id?: Prisma.SortOrder
+  id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  fullname?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   password?: Prisma.SortOrder
   salt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -380,14 +375,31 @@ export type UserMaxOrderByAggregateInput = {
 }
 
 export type UserMinOrderByAggregateInput = {
-  user_id?: Prisma.SortOrder
+  id?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  fullname?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   password?: Prisma.SortOrder
   salt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
+export type EnumUserStatusFieldUpdateOperationsInput = {
+  set?: $Enums.UserStatus
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
 export type UserCreateNestedOneWithoutUserProfileInput = {
@@ -402,10 +414,6 @@ export type UserUpdateOneRequiredWithoutUserProfileNestedInput = {
   upsert?: Prisma.UserUpsertWithoutUserProfileInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUserProfileInput, Prisma.UserUpdateWithoutUserProfileInput>, Prisma.UserUncheckedUpdateWithoutUserProfileInput>
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
 }
 
 export type UserCreateNestedOneWithoutRefreshTokensInput = {
@@ -423,27 +431,27 @@ export type UserUpdateOneRequiredWithoutRefreshTokensNestedInput = {
 }
 
 export type UserCreateWithoutUserProfileInput = {
-  user_id?: string
+  id?: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status?: boolean
+  status?: $Enums.UserStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  RefreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserProfileInput = {
-  user_id?: string
+  id?: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status?: boolean
+  status?: $Enums.UserStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  RefreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserProfileInput = {
@@ -463,51 +471,51 @@ export type UserUpdateToOneWithWhereWithoutUserProfileInput = {
 }
 
 export type UserUpdateWithoutUserProfileInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  RefreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserProfileInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  RefreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRefreshTokensInput = {
-  user_id?: string
+  id?: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status?: boolean
+  status?: $Enums.UserStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  UserProfile?: Prisma.UserProfileCreateNestedManyWithoutUserInput
+  userProfile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
-  user_id?: string
+  id?: string
   email: string
-  fullname: string
+  fullName: string
   password: string
   salt: string
-  status?: boolean
+  status?: $Enums.UserStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  UserProfile?: Prisma.UserProfileUncheckedCreateNestedManyWithoutUserInput
+  userProfile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -527,27 +535,27 @@ export type UserUpdateToOneWithWhereWithoutRefreshTokensInput = {
 }
 
 export type UserUpdateWithoutRefreshTokensInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  UserProfile?: Prisma.UserProfileUpdateManyWithoutUserNestedInput
+  userProfile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
-  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  fullname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   salt?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  UserProfile?: Prisma.UserProfileUncheckedUpdateManyWithoutUserNestedInput
+  userProfile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -556,13 +564,11 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
  */
 
 export type UserCountOutputType = {
-  UserProfile: number
-  RefreshTokens: number
+  refreshTokens: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  UserProfile?: boolean | UserCountOutputTypeCountUserProfileArgs
-  RefreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
+  refreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
 }
 
 /**
@@ -578,36 +584,29 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountUserProfileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserProfileWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountRefreshTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RefreshTokenWhereInput
 }
 
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  user_id?: boolean
+  id?: boolean
   email?: boolean
-  fullname?: boolean
+  fullName?: boolean
   password?: boolean
   salt?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  UserProfile?: boolean | Prisma.User$UserProfileArgs<ExtArgs>
-  RefreshTokens?: boolean | Prisma.User$RefreshTokensArgs<ExtArgs>
+  userProfile?: boolean | Prisma.User$userProfileArgs<ExtArgs>
+  refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  user_id?: boolean
+  id?: boolean
   email?: boolean
-  fullname?: boolean
+  fullName?: boolean
   password?: boolean
   salt?: boolean
   status?: boolean
@@ -616,9 +615,9 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  user_id?: boolean
+  id?: boolean
   email?: boolean
-  fullname?: boolean
+  fullName?: boolean
   password?: boolean
   salt?: boolean
   status?: boolean
@@ -627,9 +626,9 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
-  user_id?: boolean
+  id?: boolean
   email?: boolean
-  fullname?: boolean
+  fullName?: boolean
   password?: boolean
   salt?: boolean
   status?: boolean
@@ -637,10 +636,10 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"user_id" | "email" | "fullname" | "password" | "salt" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "fullName" | "password" | "salt" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  UserProfile?: boolean | Prisma.User$UserProfileArgs<ExtArgs>
-  RefreshTokens?: boolean | Prisma.User$RefreshTokensArgs<ExtArgs>
+  userProfile?: boolean | Prisma.User$userProfileArgs<ExtArgs>
+  refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -649,16 +648,16 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    UserProfile: Prisma.$UserProfilePayload<ExtArgs>[]
-    RefreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
+    userProfile: Prisma.$UserProfilePayload<ExtArgs> | null
+    refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    user_id: string
+    id: string
     email: string
-    fullname: string
+    fullName: string
     password: string
     salt: string
-    status: boolean
+    status: $Enums.UserStatus
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -744,8 +743,8 @@ export interface UserDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
    * // Get first 10 Users
    * const users = await prisma.user.findMany({ take: 10 })
    * 
-   * // Only select the `user_id`
-   * const userWithUser_idOnly = await prisma.user.findMany({ select: { user_id: true } })
+   * // Only select the `id`
+   * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
    * 
    */
   findMany<T extends UserFindManyArgs>(args?: Prisma.SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -789,9 +788,9 @@ export interface UserDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
    *   ]
    * })
    * 
-   * // Create many Users and only return the `user_id`
-   * const userWithUser_idOnly = await prisma.user.createManyAndReturn({
-   *   select: { user_id: true },
+   * // Create many Users and only return the `id`
+   * const userWithIdOnly = await prisma.user.createManyAndReturn({
+   *   select: { id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -880,9 +879,9 @@ export interface UserDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
    *   ]
    * })
    * 
-   * // Update zero or more Users and only return the `user_id`
-   * const userWithUser_idOnly = await prisma.user.updateManyAndReturn({
-   *   select: { user_id: true },
+   * // Update zero or more Users and only return the `id`
+   * const userWithIdOnly = await prisma.user.updateManyAndReturn({
+   *   select: { id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1055,8 +1054,8 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  UserProfile<T extends Prisma.User$UserProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$UserProfileArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  RefreshTokens<T extends Prisma.User$RefreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$RefreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  userProfile<T extends Prisma.User$userProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userProfileArgs<ExtArgs>>): Prisma.Prisma__UserProfileClient<runtime.Types.Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  refreshTokens<T extends Prisma.User$refreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1086,12 +1085,12 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
  * Fields of the User model
  */
 export interface UserFieldRefs {
-  readonly user_id: Prisma.FieldRef<"User", 'String'>
+  readonly id: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
-  readonly fullname: Prisma.FieldRef<"User", 'String'>
+  readonly fullName: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly salt: Prisma.FieldRef<"User", 'String'>
-  readonly status: Prisma.FieldRef<"User", 'Boolean'>
+  readonly status: Prisma.FieldRef<"User", 'UserStatus'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -1487,9 +1486,9 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.UserProfile
+ * User.userProfile
  */
-export type User$UserProfileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$userProfileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the UserProfile
    */
@@ -1503,17 +1502,12 @@ export type User$UserProfileArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.UserProfileInclude<ExtArgs> | null
   where?: Prisma.UserProfileWhereInput
-  orderBy?: Prisma.UserProfileOrderByWithRelationInput | Prisma.UserProfileOrderByWithRelationInput[]
-  cursor?: Prisma.UserProfileWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.UserProfileScalarFieldEnum | Prisma.UserProfileScalarFieldEnum[]
 }
 
 /**
- * User.RefreshTokens
+ * User.refreshTokens
  */
-export type User$RefreshTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$refreshTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the RefreshToken
    */
