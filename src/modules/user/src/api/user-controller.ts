@@ -1,6 +1,7 @@
 import type { Request, Response, RequestHandler } from 'express';
 import { Api } from '@template/shared';
 import type { UserSignUpUseCase } from '../application/create-user-use-case.js';
+// import type
 import type { TokenIssuerPort } from '../domain/token-issue-port.js';
 import type { SignUpDto } from './user-schema.js';
 

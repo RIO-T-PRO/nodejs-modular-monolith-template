@@ -7,5 +7,7 @@ export const createRefreshRoutes = (refreshController: RefreshController): Route
   // POST /auth/logout
   router.post('/logout', refreshController.logout);
 
+  router.post('/refresh', refreshController.refresh);
+
   return router;
 };
