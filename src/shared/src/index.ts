@@ -17,7 +17,7 @@ export type {
   UserProfileUpdateInput,
 } from './generated/prisma/models.js';
 
-export { omitProperty } from './lib/db/omit-prisma-property.js';
+export { omitProperty } from './lib/db/omit-property.js';
 
 // Constants
 export { HttpStatus, HttpStatusName, type HttpStatusCode } from './constants/index.js';

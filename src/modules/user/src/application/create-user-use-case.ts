@@ -2,7 +2,7 @@ import type { DomainEventDispatcher } from '@template/shared';
 import { AppError } from '@template/shared';
 import type { PasswordHasherPort } from '../domain/password-hasher-port.js';
 import type { UserRepositoryPort } from '../domain/user-repository-port.js';
-import type { User } from '../domain/user-types.js';
+import { toSafeUser, type SafeUser } from '../domain/user-types.js';
 import { UserCreatedEvent } from '../domain/events/user-created-event.js';
 
 export interface SignUpInput {
@@ -20,7 +20,7 @@ export class UserSignUpUseCase {
     },
   ) {}
 
-  async execute(input: SignUpInput): Promise<User> {
+  async execute(input: SignUpInput): Promise<SafeUser> {
     const existingUser = await this.deps.userRepository.findByEmail(input.email);
 
     if (existingUser) {
@@ -40,6 +40,6 @@ export class UserSignUpUseCase {
       UserCreatedEvent({ id: user.id, email: user.email, fullname: user.fullName }),
     );
 
-    return user;
+    return toSafeUser(user);
   }
 }

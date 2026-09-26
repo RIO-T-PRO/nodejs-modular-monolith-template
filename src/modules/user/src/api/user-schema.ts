@@ -1,16 +1,27 @@
 import { z } from 'zod';
 
-// SignUp schemas
-export const SignUpSchema = z.object({
-  email: z.email({ error: 'Invalid email address format' }),
-  fullName: z.string().min(2, { error: 'Full name must be at least 2 characters long' }),
-  password: z.string().min(8, { error: 'Password must be at least 8 characters long' }),
+export const GetUserByIdParamSchema = z.object({
+  id: z.uuid(),
 });
 
-export type SignUpDto = z.infer<typeof SignUpSchema>;
+export const SignUpSchema = z.object({
+  email: z.email(),
+  fullName: z.string().min(2),
+  password: z.string().min(8),
+});
 
-export const GetUserByIdParamSchema = z.object({
-  id: z.uuid({ error: 'Invalid user ID format' }),
+export const SignInSchema = z.object({
+  email: z.email(),
+  password: z.string(),
+});
+
+export const UpdateUserSchema = z.object({
+  fullName: z.string().min(2).optional(),
+  email: z.email().optional(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).optional(),
 });
 
 export type GetUserByIdParams = z.infer<typeof GetUserByIdParamSchema>;
+export type SignUpDto = z.infer<typeof SignUpSchema>;
+export type SignInDto = z.infer<typeof SignInSchema>;
+export type UpdateUserDto = z.infer<typeof UpdateUserSchema>;

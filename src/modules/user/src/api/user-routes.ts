@@ -1,9 +1,6 @@
 import { Router } from 'express';
 import { Validate } from '@template/shared';
-import {
-  SignUpSchema,
-  // GetUserByIdParamSchema
-} from './user-schema.js';
+import { SignUpSchema, GetUserByIdParamSchema, SignInSchema } from './user-schema.js';
 import type { UserController } from './user-controller.js';
 
 export const createUserRoutes = (userController: UserController): Router => {
@@ -11,11 +8,9 @@ export const createUserRoutes = (userController: UserController): Router => {
 
   router.post('/signup', Validate.body(SignUpSchema), userController.signUp);
 
-  //    router.get(
-  //     '/:id',
-  //     Validate.params(GetUserByIdParamSchema),
-  //     userController.getById,
-  //   );
+  router.post('/signin', Validate.body(SignInSchema), userController.signIn);
+
+  router.get('/:id', Validate.params(GetUserByIdParamSchema), userController.getUserById);
 
   return router;
 };
